@@ -11,11 +11,12 @@ jobs:
     steps:
         - name: Checkout repository
           uses: actions/checkout@v4
-        - name: Copy files to server
-          uses: nogsantos/ssh-scp-deploy@v1.2.0
+        - name: Copy file via SSH password
+          uses: appleboy/scp-action@v1
           with:
             host: ${{ secrets.SERVER_HOST }}
             username: ${{ secrets.SERVER_USER }}
             password: ${{ secrets.SERVER_PASSWORD }}
-            remote_path: /home/predictelec
-            local_path: .
+            port: 22
+            target: /home/predictelec
+            source: .
