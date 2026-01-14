@@ -19,4 +19,4 @@ jobs:
             password: ${{ secrets.SERVER_PASSWORD }}
             port: 22
             target: /home/predictelec
-            source: .
+            source: ./db
