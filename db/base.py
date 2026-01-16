@@ -144,7 +144,7 @@ class Database:
                 drop table if exists stations cascade;
                 create table stations
                 (
-                    id_station bigserial,
+                    id_station bigserial not null,
                     station_latitude numeric(6,4),
                     station_longitude numeric(6,4),
                     date_validite timestamp without time zone not null default now(),
@@ -186,7 +186,7 @@ class Database:
                 create table stations_centrales
                 (
                     id_station_centrale bigserial,
-                    id_station bigint not null,
+                    id_station bigserial not null,
                     id_centrale bigint not null,
                     distance_km numeric(6,2),-- clean -> round sur 2 digits valeur calculée
                     ordre integer, -- calcul : du plus proche au plus éloigné
@@ -196,7 +196,7 @@ class Database:
                     CONSTRAINT fk_stations_centrales_centrales foreign key (id_centrale)
                     references centrales(id_centrale),
                     CONSTRAINT fk_stations_centrales_stations foreign key (id_station)
-                    references stations(id_station)	,
+                    references stations(id_station),
                     CONSTRAINT stations_centrales_unique UNIQUE (id_station, id_centrale)
                 );
             """)
@@ -206,16 +206,14 @@ class Database:
                 create table meteo
                 (
                     id_meteo bigserial,
-                    id_station bigint not null,
+                    id_station bigserial not null,
                     date_validite timestamp with time zone not null,
-                    meteo_date date,
-                    meteo_heure time without time zone,
                     vitesse_vent numeric(6,1),
                     rayonnement_solaire numeric(8,1),
                     constraint meteo_pkey primary key(id_meteo),
                     CONSTRAINT meteo_ukey UNIQUE (id_station,date_validite),
                     CONSTRAINT fk_meteo_stations foreign key (id_station)
-                    references stations(id_station)	
+                    references stations(id_station)
                 );
             """)
 

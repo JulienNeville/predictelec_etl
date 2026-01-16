@@ -11,8 +11,6 @@ class Meteo:
         self.id = None
         self.id_station = None
         self.date_validite = None
-        self.meteo_date = None
-        self.meteo_heure= None
         self.vitesse_vent= None
         self.rayonnement_solaire=None
 
@@ -25,16 +23,10 @@ class Meteo:
             INSERT INTO meteo (
                 id_station,
                 date_validite,
-                meteo_date,
-                meteo_heure,
                 vitesse_vent,
                 rayonnement_solaire
             )               
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (id_station, date_validite) DO UPDATE
-            SET
-                vitesse_vent = EXCLUDED.prod_eolien,
-                rayonnement_solaire = EXCLUDED.prod_solaire
+            VALUES (%s, %s, %s, %s)
         """
 
         try:
@@ -43,8 +35,6 @@ class Meteo:
                 (
                     row.id_station,
                     row.date_validite,
-                    row.date,
-                    row.heure,
                     row.vitesse_vent,
                     row.rayonnement_solaire
                 )

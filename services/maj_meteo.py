@@ -1,66 +1,84 @@
-import requests
-from datetime import datetime, timedelta
+import sys
 import os
-import pandas as pd
+from pathlib import Path
+import time
 
+# Ajouter le répertoire parent au chemin Python
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import requests
+import pandas as pd
 from models.meteo import Meteo
+from models.station import Station
 from db.base import Database
-import dotenv #pip install python-dotenv
+import dotenv
+from api.api_meteo import get_valid_token
 
 dotenv.load_dotenv()
 
-
-def get_save_meteo(debut_date, fin_date, region=None):
+def get_save_meteo():
 
     """
-    Récupère toutes les données metteeo entre deux dates en paginant par blocs de 100.
+    Récupère toutes les données meteo entre deux dates en paginant par blocs de 100.
     - debut_date et fin_date au format 'YYYY-MM-DD'
     - region (optionnel) : ex 'Auvergne-Rhône-Alpes'
     
     Retourne une liste de dicts (enregistrements).
     """
+    df_stations_data = pd.DataFrame()
+    df_stations_data_select = pd.DataFrame()
+    db = Database(
+        host=os.getenv('DB_HOST'),
+        dbname=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),        
+        port=os.getenv('DB_PORT')
+    )
+    station = Station()
 
-    ###todo: trouver la bonne  url et les paramètres correspondant
-    BASE_URL = "https://public-api.meteofrance.fr/public/DPPaquetObs/v1/paquet/infrahoraire-6m"
-    LIMIT = 100
-    offset = 0
-    results = []
+    TOKEN = get_valid_token()
+    if not TOKEN:
+        raise ValueError("Pas de TOKEN METEO_FRANCE valide généré.")
+    HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
-    # prépare la clause WHERE
-    where_clause = f"date_heure >= '{debut_date}' AND date_heure <= '{fin_date}'"
-    if region:
-        where_clause += f" AND region = '{region}'"
+    try:
+        db.connect()
+        stations = station.getlistStation(db.conn)
+        liste_stations = stations['id_station']
+        print(len(liste_stations), "stations météo à traiter.")
+        tenth = len(liste_stations) // 10
+        liste_stations1 = liste_stations[:tenth]
+        liste_stations2 = liste_stations[tenth:2*tenth]
+        liste_stations3 = liste_stations[2*tenth:3*tenth]
+        liste_stations4 = liste_stations[3*tenth:4*tenth]
+        liste_stations5 = liste_stations[4*tenth:5*tenth]
+        liste_stations6 = liste_stations[5*tenth:6*tenth]
+        liste_stations7 = liste_stations[6*tenth:7*tenth]
+        liste_stations8 = liste_stations[7*tenth:8*tenth]
+        liste_stations9 = liste_stations[8*tenth:9*tenth]
+        liste_stations10 = liste_stations[9*tenth:]
+        liste_listes_stations = [liste_stations1, liste_stations2, liste_stations3, liste_stations4, liste_stations5, liste_stations6, liste_stations7, liste_stations8, liste_stations9, liste_stations10]
+        for liste_stations in liste_listes_stations:
+            for station in liste_stations:
+                station_str = str(station)
+                if len(station_str)<8:
+                    station_str = station_str.zfill(8)
+                BASE_URL = f"https://public-api.meteofrance.fr/public/DPPaquetObs/v1/paquet/infrahoraire-6m?id_station={station_str}&format=json"
+                response = requests.get(BASE_URL, headers=HEADERS)
+                response.raise_for_status()
+                data = response.json()
+                df_data = pd.json_normalize(data)
+                df_stations_data = pd.concat([df_stations_data, df_data], ignore_index=True)
+                print(f"Station n° {station} traitée.")
+            time.sleep(10)
+        df_stations_data_select = df_stations_data[["geo_id_insee","validity_time","ff","ray_glo01"]].copy()
+        df_stations_data_select.rename(columns={"geo_id_insee" : "id_station","validity_time" : "date_validite","ff":"vitesse_vent","ray_glo01":"rayonnement_solaire"},inplace=True)
+       
+    except Exception as e:
+        print(f"Erreur lors de la connexion à la base de données : {e}")
 
-    ###toddo: voir les paramètres à envoyer (syntaxe)
-    while True:
-        params = {
-            "xxx1": "xxx",
-            "xxx2": "xxx"  ,
-            "where": where_clause,
-            "limit": LIMIT,
-            "offset": offset
-        }
-
-        response = requests.get(BASE_URL, params=params)
-        response.raise_for_status()
-        data = response.json()
-
-        records = data.get("results", [])
-        results.extend(records)
-
-        # si moins de 100 enregistrements, on a atteint la fin
-        if len(records) < LIMIT:
-            break
-        
-        offset += LIMIT  # passe au bloc suivant
-        print("offset",offset)
-
-    # Sauvegarde des données dans la base
+    # # Sauvegarde des données dans la base
     meteo = Meteo()
-
-    ###todo: vérifier correspondance colonnes avec l'attendu (vent+soleil)
-    df_records = pd.json_normalize(results) 
-
     db = Database(
         host=os.getenv('DB_HOST'),
         dbname=os.getenv('DB_NAME'),
@@ -70,39 +88,14 @@ def get_save_meteo(debut_date, fin_date, region=None):
     )
     try:
         db.connect()
-        isaved = meteo.save_lot(df_records, db.conn)
+        isaved = meteo.save_lot(df_stations_data_select, db.conn)
         if isaved:  
-            print(f"Sauvegarde réussie de {len(results)} enregistrements de production.")
+            print(f"Sauvegarde réussie de {df_stations_data_select.shape[0]} enregistrements de production.")
         else:
             print("Erreur lors de la sauvegarde des données de production.")
     except Exception as e:
         print(f"Erreur lors de la connexion à la base de données : {e}")
     finally:
         db.close()   
-    return results
 
-
-
-
-def get_save_meteo_hier():
-    """
-    Docstring for get_save_meteo_hier
-    Appel spécifiquement save meteo pour la journée d'hier
-    """
-    hier = datetime.now() - timedelta(days=1)
-    hier_str = hier.strftime("%Y-%m-%d")
-    return get_save_meteo(hier_str, hier_str)
-
-if __name__ == "__main__":
-    ##test sur la journée d'hier
-    #all_data=get_save_meteo_hier()
-    
-    #test sur une période
-    start = "2025-07-01"
-    end   = "2025-07-07"
-    region_id = None  # ou "22"
-
-    all_data = get_save_meteo(start, end, region=region_id)
-
-    print(f"Nombre total d'enregistrements récupérés : {len(all_data)}")
-    print(all_data[:5])  # aperçu des 5 premiers
+    return df_stations_data_select

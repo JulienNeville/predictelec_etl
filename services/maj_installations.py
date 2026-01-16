@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Ajouter le répertoire parent au chemin Python
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import requests
 import pandas as pd
 from models.installation import Installation
