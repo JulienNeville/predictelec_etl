@@ -60,7 +60,6 @@ def get_save_production():
     finally:
         db.close()
 
-
 def fetch_production(region, start_datetime, end_datetime):
     """
     Docstring for fetch_production
@@ -70,7 +69,7 @@ def fetch_production(region, start_datetime, end_datetime):
     :param start_datetime: Description
     :param end_datetime: Description
     """
-    API_URL = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records"
+    API_URL = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-cons-def/records"
     params = {
         "where": (
             f"code_insee_region = '{region}' "
@@ -104,8 +103,8 @@ def get_save_production_regions(start_date, end_date, regions, conn):
     """
     prod = Production()
     for day in daterange(start_date, end_date):
-        day_start = f"{day}T00:00:00"
-        day_end = f"{day}T23:59:59"
+        day_start = f"{day}T00:00:00+00:00"
+        day_end = f"{day}T23:59:59+00:00"
 
         for region in regions:
             try:
@@ -133,95 +132,96 @@ def get_save_production_regions(start_date, end_date, regions, conn):
                 log_import(conn, region, day, "ERROR", str(e))
                 print(f"Erreur région {region} | {day} : {e}")
 
+get_save_production()
 
-def get_save_production_regions_old(debut_date, fin_date, region=None):
+# def get_save_production_regions_old(debut_date, fin_date, region=None):
 
-    """
-    Récupère toutes les données eco2mix-regional-tr entre deux dates en paginant par blocs de 100.
-    - debut_date et fin_date au format 'YYYY-MM-DD'
-    - region (optionnel) : ex 'Auvergne-Rhône-Alpes'
+#     """
+#     Récupère toutes les données eco2mix-regional-tr entre deux dates en paginant par blocs de 100.
+#     - debut_date et fin_date au format 'YYYY-MM-DD'
+#     - region (optionnel) : ex 'Auvergne-Rhône-Alpes'
     
-    Retourne une liste de dicts (enregistrements).
-    """
+#     Retourne une liste de dicts (enregistrements).
+#     """
 
-    BASE_URL = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records"
-    LIMIT = 100
-    offset = 0
-    results = []
+#     BASE_URL = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records"
+#     LIMIT = 100
+#     offset = 0
+#     results = []
 
-    # prépare la clause WHERE
-    where_clause = f"date_heure >= '{debut_date}' AND date_heure <= '{fin_date}'"
-    if region:
-        where_clause += f" AND region = '{region}'"
+#     # prépare la clause WHERE
+#     where_clause = f"date_heure >= '{debut_date}' AND date_heure <= '{fin_date}'"
+#     if region:
+#         where_clause += f" AND region = '{region}'"
 
-    while True:
-        params = {
-            "select": "code_insee_region,date_heure,date,heure,tch_eolien,tch_solaire",
-            "where": where_clause,
-            "limit": LIMIT,
-            "offset": offset,
-            "order_by": "date_heure"   # pour un ordre cohérent des données
-        }
+#     while True:
+#         params = {
+#             "select": "code_insee_region,date_heure,date,heure,tch_eolien,tch_solaire",
+#             "where": where_clause,
+#             "limit": LIMIT,
+#             "offset": offset,
+#             "order_by": "date_heure"   # pour un ordre cohérent des données
+#         }
 
-        response = requests.get(BASE_URL, params=params)
-        response.raise_for_status()
-        data = response.json()
+#         response = requests.get(BASE_URL, params=params)
+#         response.raise_for_status()
+#         data = response.json()
 
-        records = data.get("results", [])
-        results.extend(records)
+#         records = data.get("results", [])
+#         results.extend(records)
 
-        # si moins de 100 enregistrements, on a atteint la fin
-        if len(records) < LIMIT:
-            break
+#         # si moins de 100 enregistrements, on a atteint la fin
+#         if len(records) < LIMIT:
+#             break
         
-        offset += LIMIT  # passe au bloc suivant
-        print("offset",offset)
+#         offset += LIMIT  # passe au bloc suivant
+#         print("offset",offset)
 
-    # Sauvegarde des données dans la base
-    prod = Production()
-    df_records = pd.json_normalize(results) 
+#     # Sauvegarde des données dans la base
+#     prod = Production()
+#     df_records = pd.json_normalize(results) 
 
-    db = Database(
-        host=os.getenv('DB_HOST'),
-        dbname=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),        
-        port=os.getenv('DB_PORT')
-    )
-    try:
-        db.connect()
-        isaved = prod.save_lot(df_records, db.conn)
-        if isaved:  
-            print(f"Sauvegarde réussie de {len(results)} enregistrements de production.")
-        else:
-            print("Erreur lors de la sauvegarde des données de production.")
-    except Exception as e:
-        print(f"Erreur lors de la connexion à la base de données : {e}")
-    finally:
-        db.close()   
-    return results
+#     db = Database(
+#         host=os.getenv('DB_HOST'),
+#         dbname=os.getenv('DB_NAME'),
+#         user=os.getenv('DB_USER'),
+#         password=os.getenv('DB_PASSWORD'),        
+#         port=os.getenv('DB_PORT')
+#     )
+#     try:
+#         db.connect()
+#         isaved = prod.save_lot(df_records, db.conn)
+#         if isaved:  
+#             print(f"Sauvegarde réussie de {len(results)} enregistrements de production.")
+#         else:
+#             print("Erreur lors de la sauvegarde des données de production.")
+#     except Exception as e:
+#         print(f"Erreur lors de la connexion à la base de données : {e}")
+#     finally:
+#         db.close()   
+#     return results
 
 
 
-def get_save_production_regions_hier():
-    """
-    Docstring for get_save_production_regions_hier
-    Appel spécifiquement save production pour la journée d'hier
-    """
-    hier = date.now() - timedelta(days=1)
-    hier_str = hier.strftime("%Y-%m-%d")
-    return get_save_production_regions(hier_str, hier_str)
+# def get_save_production_regions_hier():
+#     """
+#     Docstring for get_save_production_regions_hier
+#     Appel spécifiquement save production pour la journée d'hier
+#     """
+#     hier = date.now() - timedelta(days=1)
+#     hier_str = hier.strftime("%Y-%m-%d")
+#     return get_save_production_regions(hier_str, hier_str)
 
-if __name__ == "__main__":
-    ##test sur la journée d'hier
-    #all_data=get_save_production_regions_hier()
+# if __name__ == "__main__":
+#     ##test sur la journée d'hier
+#     #all_data=get_save_production_regions_hier()
     
-    #test sur une période
-    start = "2025-07-01"
-    end   = "2025-07-07"
-    region_id = None  # ou "22"
+#     #test sur une période
+#     start = "2025-07-01"
+#     end   = "2025-07-07"
+#     region_id = None  # ou "22"
 
-    all_data = get_save_production_regions(start, end, region=region_id)
+#     all_data = get_save_production_regions(start, end, region=region_id)
 
-    print(f"Nombre total d'enregistrements récupérés : {len(all_data)}")
-    print(all_data[:5])  # aperçu des 5 premiers
+#     print(f"Nombre total d'enregistrements récupérés : {len(all_data)}")
+#     print(all_data[:5])  # aperçu des 5 premiers

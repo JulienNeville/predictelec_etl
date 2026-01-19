@@ -13,10 +13,73 @@ from models.station import Station
 from db.base import Database
 import dotenv
 from api.api_meteo import get_valid_token
+from datetime import datetime, timedelta
 
 dotenv.load_dotenv()
 
-def get_save_meteo():
+# Sauvegarde des données dans la base
+def save_data(df_stations):
+    meteo = Meteo()
+    db = Database(
+        host=os.getenv('DB_HOST'),
+        dbname=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),        
+        port=os.getenv('DB_PORT')
+    )
+    try:
+        db.connect()
+        isaved = meteo.save_lot(df_stations, db.conn)
+        if isaved:  
+            print(f"Sauvegarde réussie de {df_stations.shape[0]} enregistrements de production.")
+        else:
+            print("Erreur lors de la sauvegarde des données de production.")
+    except Exception as e:
+        print(f"Erreur lors de la connexion à la base de données : {e}")
+    finally:
+        db.close()   
+
+    return df_stations
+
+# def get_save_meteo_past_month():
+#     # L'API retourne une liste vide
+#     """
+#     Docstring pour get_save_meteo_past_month
+#     """
+#     TOKEN = get_valid_token()
+#     if not TOKEN:
+#         raise ValueError("Pas de TOKEN METEO_FRANCE valide généré.")
+#     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
+
+#     df_stations_data = pd.DataFrame()
+#     df_stations_data_select = pd.DataFrame()
+
+#     # Calcul des dates de début et de fin du mois précédent
+#     today = datetime.today()
+#     first_day_of_current_month = today.replace(day=1)
+#     last_day_of_previous_month = first_day_of_current_month - timedelta(days=1)
+#     first_day_of_previous_month = last_day_of_previous_month.replace(day=1)
+#     last_day_of_previous_month_str = last_day_of_previous_month.strftime("%Y-%m-%dT%H:%M:00Z")
+#     first_day_of_previous_month_str = first_day_of_previous_month.strftime("%Y-%m-%dT00:06:00Z")
+
+#     BASE_URL = f"https://public-api.meteofrance.fr/public/DPPaquetObs/v1/paquet/stations/infrahoraire-6m?date={first_day_of_previous_month_str}&format=json"
+#     try:
+#         response = requests.get(BASE_URL, headers=HEADERS)
+#         response.raise_for_status()
+#         data = response.json()
+#         df_data = pd.json_normalize(data)
+#         df_stations_data = pd.concat([df_stations_data, df_data], ignore_index=True)
+#         print(data)
+#         # df_stations_data_select = df_stations_data[["geo_id_insee","validity_time","ff","ray_glo01"]].copy()
+#         # df_stations_data_select.rename(columns={"geo_id_insee" : "id_station","validity_time" : "date_validite","ff":"vitesse_vent","ray_glo01":"rayonnement_solaire"},inplace=True)
+        
+#     except Exception as e:
+#         print(f"Erreur lors de la requête : {e}")
+
+#     finally:
+#         save_data(df_stations_data_select)
+
+def get_save_meteo_hier():
 
     """
     Récupère toutes les données meteo entre deux dates en paginant par blocs de 100.
@@ -77,25 +140,7 @@ def get_save_meteo():
     except Exception as e:
         print(f"Erreur lors de la connexion à la base de données : {e}")
 
-    # # Sauvegarde des données dans la base
-    meteo = Meteo()
-    db = Database(
-        host=os.getenv('DB_HOST'),
-        dbname=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),        
-        port=os.getenv('DB_PORT')
-    )
-    try:
-        db.connect()
-        isaved = meteo.save_lot(df_stations_data_select, db.conn)
-        if isaved:  
-            print(f"Sauvegarde réussie de {df_stations_data_select.shape[0]} enregistrements de production.")
-        else:
-            print("Erreur lors de la sauvegarde des données de production.")
-    except Exception as e:
-        print(f"Erreur lors de la connexion à la base de données : {e}")
     finally:
-        db.close()   
+        save_data(df_stations_data_select)
 
-    return df_stations_data_select
+get_save_meteo_hier()

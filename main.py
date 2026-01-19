@@ -4,7 +4,7 @@ from services.maj_installations import get_save_allinstallations as maj_installa
 from services.maj_installations import save_installations_geoloc as maj_geoloc
 from services.maj_stations import get_save_stations_eligibles as maj_stations
 from services.combine_installations_stations import combine_installations_stations_eligibles as combine
-from services.maj_meteo import get_save_meteo as maj_meteo_quotidien
+from services.maj_meteo import get_save_meteo_hier as maj_meteo_quotidien
 from services.maj_production import get_save_production as maj_production_mois_precedent
 
 def main(action=None):
