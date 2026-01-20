@@ -20,6 +20,7 @@ jobs:
             port: 22
             target: predictelec
             source: .
+            rm: true
         - name: Setup venv and restart app (SSH)
           uses: appleboy/ssh-action@v1
           with:
