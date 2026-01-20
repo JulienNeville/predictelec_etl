@@ -109,18 +109,28 @@ def get_save_meteo_hier():
         stations = station.getlistStation(db.conn)
         liste_stations = stations['id_station']
         print(len(liste_stations), "stations météo à traiter.")
-        tenth = len(liste_stations) // 10
-        liste_stations1 = liste_stations[:tenth]
-        liste_stations2 = liste_stations[tenth:2*tenth]
-        liste_stations3 = liste_stations[2*tenth:3*tenth]
-        liste_stations4 = liste_stations[3*tenth:4*tenth]
-        liste_stations5 = liste_stations[4*tenth:5*tenth]
-        liste_stations6 = liste_stations[5*tenth:6*tenth]
-        liste_stations7 = liste_stations[6*tenth:7*tenth]
-        liste_stations8 = liste_stations[7*tenth:8*tenth]
-        liste_stations9 = liste_stations[8*tenth:9*tenth]
-        liste_stations10 = liste_stations[9*tenth:]
-        liste_listes_stations = [liste_stations1, liste_stations2, liste_stations3, liste_stations4, liste_stations5, liste_stations6, liste_stations7, liste_stations8, liste_stations9, liste_stations10]
+        twentyth = len(liste_stations) // 20
+        liste_stations1 = liste_stations[:twentyth]
+        liste_stations2 = liste_stations[twentyth:2*twentyth]
+        liste_stations3 = liste_stations[2*twentyth:3*twentyth]
+        liste_stations4 = liste_stations[3*twentyth:4*twentyth]
+        liste_stations5 = liste_stations[4*twentyth:5*twentyth]
+        liste_stations6 = liste_stations[5*twentyth:6*twentyth]
+        liste_stations7 = liste_stations[6*twentyth:7*twentyth]
+        liste_stations8 = liste_stations[7*twentyth:8*twentyth]
+        liste_stations9 = liste_stations[8*twentyth:9*twentyth]
+        liste_stations10 = liste_stations[9*twentyth:10*twentyth]
+        liste_stations11 = liste_stations[10*twentyth:11*twentyth]
+        liste_stations12 = liste_stations[11*twentyth:12*twentyth]
+        liste_stations13 = liste_stations[12*twentyth:13*twentyth]
+        liste_stations14 = liste_stations[13*twentyth:14*twentyth]
+        liste_stations15 = liste_stations[14*twentyth:15*twentyth]
+        liste_stations16 = liste_stations[15*twentyth:16*twentyth]
+        liste_stations17 = liste_stations[16*twentyth:17*twentyth]
+        liste_stations18 = liste_stations[17*twentyth:18*twentyth]
+        liste_stations19 = liste_stations[18*twentyth:19*twentyth]
+        liste_stations20 = liste_stations[19*twentyth:]
+        liste_listes_stations = [liste_stations1, liste_stations2, liste_stations3, liste_stations4, liste_stations5, liste_stations6, liste_stations7, liste_stations8, liste_stations9, liste_stations10, liste_stations11, liste_stations12, liste_stations13, liste_stations14, liste_stations15, liste_stations16, liste_stations17, liste_stations18, liste_stations19, liste_stations20]
         for liste_stations in liste_listes_stations:
             for station in liste_stations:
                 station_str = str(station)
@@ -133,7 +143,7 @@ def get_save_meteo_hier():
                 df_data = pd.json_normalize(data)
                 df_stations_data = pd.concat([df_stations_data, df_data], ignore_index=True)
                 print(f"Station n° {station} traitée.")
-            time.sleep(10)
+            time.sleep(12)
         df_stations_data_select = df_stations_data[["geo_id_insee","validity_time","ff","ray_glo01"]].copy()
         df_stations_data_select.rename(columns={"geo_id_insee" : "id_station","validity_time" : "date_validite","ff":"vitesse_vent","ray_glo01":"rayonnement_solaire"},inplace=True)
        
