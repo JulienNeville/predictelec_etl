@@ -31,8 +31,10 @@ jobs:
             script: |
               cd predictelec
               python3 -m venv .venv
-              source .venv/bin/activate
+              . .venv/bin/activate
+              which python
+              python -V
+              pip -V
               pip install --upgrade pip
               pip install -r requirements.txt
 
-              
