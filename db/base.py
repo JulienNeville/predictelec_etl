@@ -147,7 +147,7 @@ class Database:
                     id_station bigserial not null,
                     station_latitude numeric(6,4),
                     station_longitude numeric(6,4),
-                    date_validite timestamp without time zone not null default now(),
+                    validity_time timestamp without time zone not null default now(),
                     mesure_vent boolean default false,
                     mesure_rayonnement boolean default false, 
                     debut timestamp without time zone default now(),
@@ -207,11 +207,11 @@ class Database:
                 (
                     id_meteo bigserial,
                     id_station bigserial not null,
-                    date_validite timestamp with time zone not null,
+                    validity_time timestamp with time zone not null,
                     vitesse_vent numeric(6,1),
                     rayonnement_solaire numeric(8,1),
                     constraint meteo_pkey primary key(id_meteo),
-                    CONSTRAINT meteo_ukey UNIQUE (id_station,date_validite),
+                    CONSTRAINT meteo_ukey UNIQUE (id_station,validity_time),
                     CONSTRAINT fk_meteo_stations foreign key (id_station)
                     references stations(id_station)
                 );

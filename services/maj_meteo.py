@@ -71,7 +71,7 @@ def save_data(df_stations):
 #         df_stations_data = pd.concat([df_stations_data, df_data], ignore_index=True)
 #         print(data)
 #         # df_stations_data_select = df_stations_data[["geo_id_insee","validity_time","ff","ray_glo01"]].copy()
-#         # df_stations_data_select.rename(columns={"geo_id_insee" : "id_station","validity_time" : "date_validite","ff":"vitesse_vent","ray_glo01":"rayonnement_solaire"},inplace=True)
+#         # df_stations_data_select.rename(columns={"geo_id_insee" : "id_station","validity_time" : "validity_time","ff":"vitesse_vent","ray_glo01":"rayonnement_solaire"},inplace=True)
         
 #     except Exception as e:
 #         print(f"Erreur lors de la requête : {e}")
@@ -145,7 +145,7 @@ def get_save_meteo_hier():
                 print(f"Station n° {station} traitée.")
             time.sleep(30)
         df_stations_data_select = df_stations_data[["geo_id_insee","validity_time","ff","ray_glo01"]].copy()
-        df_stations_data_select.rename(columns={"geo_id_insee" : "id_station","validity_time" : "date_validite","ff":"vitesse_vent","ray_glo01":"rayonnement_solaire"},inplace=True)
+        df_stations_data_select.rename(columns={"geo_id_insee" : "id_station","validity_time" : "validity_time","ff":"vitesse_vent","ray_glo01":"rayonnement_solaire"},inplace=True)
        
     except Exception as e:
         print(f"Erreur lors de la connexion à la base de données : {e}")

@@ -10,7 +10,7 @@ class Meteo:
     def __init__(self):
         self.id = None
         self.id_station = None
-        self.date_validite = None
+        self.validity_time = None
         self.vitesse_vent= None
         self.rayonnement_solaire=None
 
@@ -22,7 +22,7 @@ class Meteo:
         sql = """
             INSERT INTO meteo (
                 id_station,
-                date_validite,
+                validity_time,
                 vitesse_vent,
                 rayonnement_solaire
             )               
@@ -34,7 +34,7 @@ class Meteo:
             records = [
                 (
                     row.id_station,
-                    row.date_validite,
+                    row.validity_time,
                     row.vitesse_vent,
                     row.rayonnement_solaire
                 )
