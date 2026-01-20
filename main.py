@@ -40,7 +40,10 @@ def main(action=None):
         maj_meteo_quotidien()
 
 if __name__ == "__main__":
+    pass
     # main("INIT")
     # main("MAJ_STRUCTURES")
     # main("MAJ_PROD")
-    main("MAJ_METEO")
+    # main("MAJ_METEO")
+
+    
