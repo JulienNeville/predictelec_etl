@@ -31,9 +31,9 @@ def save_data(df_stations):
         db.connect()
         isaved = meteo.save_lot(df_stations, db.conn)
         if isaved:  
-            print(f"Sauvegarde réussie de {df_stations.shape[0]} enregistrements de production.")
+            print(f"Sauvegarde réussie de {df_stations.shape[0]} enregistrements de météo.")
         else:
-            print("Erreur lors de la sauvegarde des données de production.")
+            print("Erreur lors de la sauvegarde des données météo.")
     except Exception as e:
         print(f"Erreur lors de la connexion à la base de données : {e}")
     finally:
@@ -153,4 +153,6 @@ def get_save_meteo_hier():
     finally:
         save_data(df_stations_data_select)
 
-get_save_meteo_hier()
+
+if __name__ == "__main__":
+    get_save_meteo_hier()

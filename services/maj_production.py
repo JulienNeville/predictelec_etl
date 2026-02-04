@@ -69,7 +69,7 @@ def fetch_production(region, start_datetime, end_datetime):
     :param start_datetime: Description
     :param end_datetime: Description
     """
-    API_URL = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-cons-def/records"
+    API_URL = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records"
     params = {
         "where": (
             f"code_insee_region = '{region}' "
@@ -129,10 +129,11 @@ def get_save_production_regions(start_date, end_date, regions, conn):
 
             except Exception as e:
                 conn.rollback()
-                log_import(conn, region, day, "ERROR", str(e))
+                log_import("PROD",region, day, "ERROR", str(e),conn)
                 print(f"Erreur région {region} | {day} : {e}")
 
-get_save_production()
+if __name__ == "__main__":
+    get_save_production()
 
 # def get_save_production_regions_old(debut_date, fin_date, region=None):
 

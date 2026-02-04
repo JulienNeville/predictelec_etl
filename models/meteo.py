@@ -26,7 +26,7 @@ class Meteo:
                 vitesse_vent,
                 rayonnement_solaire
             )               
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s) ON CONFLICT (id_station, validity_time) DO NOTHING
         """
 
         try:

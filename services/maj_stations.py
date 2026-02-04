@@ -119,4 +119,5 @@ if __name__ == "__main__":
     else:
         print(f"Nombre de stations éligibles importées ou mises à jour : {result['total_inserted']} sur un total de {result['total_count']}.")
 
-get_save_stations_eligibles()
+if __name__ == "__main__":
+    get_save_stations_eligibles()
