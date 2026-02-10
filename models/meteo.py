@@ -27,6 +27,10 @@ class Meteo:
                 rayonnement_solaire
             )               
             VALUES (%s, %s, %s, %s)
+            ON CONFLICT (id_station, validity_time) DO UPDATE
+                SET
+                    vitesse_vent = EXCLUDED.vitesse_vent,
+                    rayonnement_solaire = EXCLUDED.rayonnement_solaire
         """
 
         try:

@@ -52,30 +52,86 @@ class Production:
             print(f"Erreur lors de la récupération des données de production : {e}")
             return []
 
-
-    def save_lot(self, df, conn):
-        ## Fonction pour sauvegarder les données de production dans la bdd
-        print("sauvegarde des données de production...")
-        isuccess = True
+    def delete_non_consolidee(self, region, day_start, day_end, conn):
+        """
+        Supprime les données de production NON consolidées (temps réel)
+        pour une région et une période données.
+        """
+        print(
+            f"Suppression des données temps réel "
+            f"pour la région {region} entre {day_start} et {day_end}"
+        )
 
         sql = """
-            INSERT INTO production (
-                num_region,
-                date_heure,
-                prod_date,
-                prod_heure,
-                prod_eolien,
-                prod_solaire
-            )               
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (num_region, date_heure) DO UPDATE
-            SET
-                prod_eolien = EXCLUDED.prod_eolien,
-                prod_solaire = EXCLUDED.prod_solaire
+            DELETE FROM production
+            WHERE
+                num_region = %s
+                AND source = 'REALTIME'
+                AND date_heure >= %s
+                AND date_heure < %s
         """
 
         try:
             cur = conn.cursor()
+            cur.execute(sql, (region, day_start, day_end))
+            deleted = cur.rowcount
+            conn.commit()
+
+            print(f"{deleted} lignes temps réel supprimées")
+
+        except Exception as e:
+            conn.rollback()
+            raise RuntimeError(
+                f"Erreur lors de la suppression des données non consolidées : {e}"
+            )
+
+
+    def save_lot(self, df, source, conn):
+        """
+        Sauvegarde des données de production en base
+        source : 'realtime' | 'consolide'
+        """
+        print(f"sauvegarde des données de production ({source})...")
+        isuccess = True
+
+        if source == "REALTIME":
+            sql = """
+                INSERT INTO production (
+                    num_region,
+                    date_heure,
+                    prod_date,
+                    prod_heure,
+                    prod_eolien,
+                    prod_solaire,
+                    source
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (num_region, date_heure) DO UPDATE
+                SET
+                    prod_eolien = EXCLUDED.prod_eolien,
+                    prod_solaire = EXCLUDED.prod_solaire,
+                    source = EXCLUDED.source
+            """
+        elif source == "CONSOLIDE":
+            sql = """
+                INSERT INTO production (
+                    num_region,
+                    date_heure,
+                    prod_date,
+                    prod_heure,
+                    prod_eolien,
+                    prod_solaire,
+                    source
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (num_region, date_heure) DO NOTHING
+            """
+        else:
+            raise ValueError(f"Source inconnue : {source}")
+
+        try:
+            cur = conn.cursor()
+
             records = [
                 (
                     row.code_insee_region,
@@ -83,17 +139,19 @@ class Production:
                     row.date,
                     row.heure,
                     row.tch_eolien,
-                    row.tch_solaire
+                    row.tch_solaire,
+                    source
                 )
                 for row in df.itertuples(index=False)
             ]
 
             execute_batch(cur, sql, records, page_size=1000)
             conn.commit()
-            print(f"{len(records)} lignes de production sauvegardées en base")
+            print(f"{len(records)} lignes sauvegardées ({source})")
+
         except Exception as e:
             conn.rollback()
-            print(f"Erreur lors de la sauvegarde des données de production : {e}")
+            print(f"Erreur lors de la sauvegarde : {e}")
             isuccess = False
 
         return isuccess

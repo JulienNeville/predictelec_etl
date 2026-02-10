@@ -36,7 +36,35 @@ class Station:
         except Exception as e:
             print(f"Erreur lors de la récupération des stations : {e}")
             return []
+
+    def getlistStationUtile(self, conn):
+        """
+        Docstring for getlistStationUtile
         
+        :param conn: connexion à la base de données ouverte
+        """
+        ## Fonction pour extraire les données des stations depuis la BDD
+        try:
+            cur = conn.cursor()
+            sql = """
+                select distinct s.* from stations_centrales sc
+                inner join stations s on sc.id_station = s.id_station
+                order by s.id_station;
+            """
+
+            cur.execute(sql)
+            ## Récupération des noms de colonnes
+            colonnes = [desc[0] for desc in cur.description]
+            ## Récupération des données
+            rows = cur.fetchall()
+            ## Création du DataFrame
+            data = pd.DataFrame(rows, columns=colonnes)
+            
+            return data
+        except Exception as e:
+            print(f"Erreur lors de la récupération des stations : {e}")
+            return []
+                
     def save_lot(self, df, conn):
         ## Fonction pour sauvegarder les données des stations dans la bdd
         print("sauvegarde des données des stations...")

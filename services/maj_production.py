@@ -1,17 +1,20 @@
+# debug : ajoute répertoire parent au PYTHONPATH
+#import sys
+#from pathlib import Path
+#sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+
 import json
 import requests
 from datetime import date,timedelta
 import os
 import pandas as pd
-# debug : ajoute répertoire parent au PYTHONPATH
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 # fichiers __init__.py nécessaire dans chaque répertoire
 from models.production import Production
 from models.territoire import Territoire
 from db.base import Database
-from db.sql_utils import log_import
+from db.sql_utils import get_last_import_date, log_import
 import dotenv #pip install python-dotenv
 
 dotenv.load_dotenv()
@@ -30,20 +33,15 @@ def get_save_production():
     """
     Docstring for get_save_production
     Traitement de la période + region
+    - récupération de la date max des données consolidées pour limiter les appels API
+    - récupération de la dernière date importée (consolidée et temps réel) pour reprise incrémentale
+     (en reprenant le lendemain de la dernière date importée pour éviter les doublons et les appels inutiles à l'API)
     """
-    ###todo : gestion traitement en base ou outil externe ??
-    
-    # exemple avec mois complet (précédent par défaut)
-    jour = date.today()
+    ###reprise incrémentale
+    max_date_consolidee = get_max_date_consolidee()
+    print("Date max des données consolidées :", max_date_consolidee)
 
-    # premier jour du mois courant
-    premierjour_mois = jour.replace(day=1)
 
-    # dernier jour du mois précédent
-    dernierjour_moisprecedent = premierjour_mois - timedelta(days=1)
-
-    # premier jour du mois précédent
-    premierjour_moisprecedent = dernierjour_moisprecedent.replace(day=1)
     db = Database(
         host=os.getenv('DB_HOST'),
         dbname=os.getenv('DB_NAME'),
@@ -53,14 +51,66 @@ def get_save_production():
     )
     try:
         db.connect()
+        last_consolide = get_last_import_date("PROD","CONSOLIDE", db.conn)
+        last_realtime = get_last_import_date("PROD","REALTIME", db.conn) 
+
+        print("Dernière date CONSOLIDE :", last_consolide)
+        print("Dernière date REALTIME :", last_realtime)
+        
+        jour = date.today()
+        ## test période antérieure: janvier 2025
+        #jour = date(2025, 1, 15)
+        # premier jour du mois courant
+        premierjour_mois = jour.replace(day=1)
+        # dernier jour du mois précédent
+        dernierjour_moisprecedent = premierjour_mois - timedelta(days=1)
+        # premier jour du mois précédent
+        premierjour_moisprecedent = dernierjour_moisprecedent.replace(day=1)
+
+        # Par défaut : mois précédent complet
+        start_target = premierjour_moisprecedent
+        end_target = dernierjour_moisprecedent
+
+        # période consolidée
+        conso_start = start_target
+        conso_end = min(end_target, max_date_consolidee)
+        # Si déjà des imports consolidés → reprise le lendemain
+        if last_consolide:
+            conso_start = max(conso_start, last_consolide + timedelta(days=1))
+
+        # période temps réel
+        realtime_start = max(start_target, max_date_consolidee + timedelta(days=1))
+        realtime_end = end_target
+        # Si déjà des imports temps réel → reprise le lendemain (si pas déjà dans la période consolidée)
+        if last_realtime:
+            realtime_start = max(realtime_start, last_realtime + timedelta(days=1))
+
+
+
         liste_region = Territoire.liste_regions(db.conn)
-        get_save_production_regions(premierjour_moisprecedent,dernierjour_moisprecedent,liste_region,db.conn)
+        if conso_start <= conso_end:
+            print(f"Import CONSOLIDE du {conso_start} au {conso_end}")
+            get_save_production_regions_consolidee(
+                conso_start, conso_end, liste_region, db.conn
+            )
+        else:
+            print("Aucune donnée CONSOLIDE à importer")
+        
+        if realtime_start <= realtime_end:
+            print(f"Import REALTIME du {realtime_start} au {realtime_end}")
+            get_save_production_regions_tempsreel(
+                realtime_start, realtime_end, liste_region, db.conn
+            )
+        else:
+            print("Aucune donnée REALTIME à importer")      
+
+        #get_save_production_regions(start_date,end_date,liste_region,db.conn)
     except Exception as e:
         print(f"Erreur lors de la connexion à la base de données : {e}")
     finally:
         db.close()
 
-def fetch_production(region, start_datetime, end_datetime):
+def fetch_production_consolidee(region, start_datetime, end_datetime):
     """
     Docstring for fetch_production
     Appel API production par region et par date
@@ -97,11 +147,61 @@ def fetch_production(region, start_datetime, end_datetime):
 
     return pd.DataFrame(all_rows)
 
-def get_save_production_regions(start_date, end_date, regions, conn):
+def fetch_production_tempsreel(region, start_datetime, end_datetime):
+    """
+    Docstring for fetch_production
+    Appel API production par region et par date
+    (attention <10000 enregistrements par limit 100)
+    :param region: Description
+    :param start_datetime: Description
+    :param end_datetime: Description
+    """
+    API_URL = "https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records"
+    params = {
+        "where": (
+            f"code_insee_region = '{region}' "
+            f"AND date_heure >= '{start_datetime}' "
+            f"AND date_heure <= '{end_datetime}'"
+        ),
+        "limit": 100,
+        "order_by": "date_heure"
+    }
+
+    all_rows = []
+    offset = 0
+
+    while True:
+        params["offset"] = offset
+        r = requests.get(API_URL, params=params)
+        r.raise_for_status()
+        data = r.json()["results"]
+
+        if not data:
+            break
+
+        all_rows.extend(data)
+        offset += 100
+
+    return pd.DataFrame(all_rows)
+
+# recherche de la date max des données consolidées pour limiter les appels API
+def get_max_date_consolidee():
+    url = (
+        "https://odre.opendatasoft.com/api/explore/v2.1/"
+        "catalog/datasets/eco2mix-regional-cons-def/records"
+        "?limit=1&order_by=-date_heure"
+    )
+    r = requests.get(url)
+    r.raise_for_status()
+    results = r.json()["results"]
+    return pd.to_datetime(results[0]["date_heure"], utc=True).date()
+
+def get_save_production_regions_consolidee(start_date, end_date, regions, conn):
     """
     Import de la production par jour et par région
     """
     prod = Production()
+
     for day in daterange(start_date, end_date):
         day_start = f"{day}T00:00:00+00:00"
         day_end = f"{day}T23:59:59+00:00"
@@ -111,28 +211,109 @@ def get_save_production_regions(start_date, end_date, regions, conn):
                 print(f"Import production | Région {region} | {day}")
 
                 # 1 appel API
-                df = fetch_production(
+                df = fetch_production_consolidee(
                     region=region,
                     start_datetime=day_start,
                     end_datetime=day_end
                 )
 
                 if df.empty:
-                    log_import("PROD", region, day, "SUCCESS", "Aucune donnée",conn)
+                    log_import("PROD", region, day, "WARNING", "CONSOLIDE","Aucune donnée",conn)
                     continue
 
-                # 2 insertion immédiate
-                prod.save_lot(df, conn)
+                # vérification des données : si les deux productions éolien et solaire sont nulles → log warning et pas d'insertion
+                # Vérifie colonnes présentes
+                if {"prod_eolien", "prod_solaire"}.issubset(df.columns):
+                    eolien_sum = df["prod_eolien"].fillna(0).sum()
+                    solaire_sum = df["prod_solaire"].fillna(0).sum()
+                    if eolien_sum == 0 and solaire_sum == 0:
+                        log_import("PROD", region, day, "WARNING", "CONSOLIDE","Valeurs nulles",conn)
+                        continue
+
+                # 2 suppression des données non consolidées sur la période (si existantes)
+                prod.delete_non_consolidee(region, day_start, day_end, conn)
+                # 3 insertion immédiate
+                prod.save_lot(df,"CONSOLIDE", conn)
 
                 # 3 log succès
-                log_import("PROD", region, day, "SUCCESS", None,conn)
+                log_import("PROD", region, day, "SUCCESS", "CONSOLIDE",None,conn)
 
             except Exception as e:
                 conn.rollback()
-                log_import(conn, region, day, "ERROR", str(e))
+                log_import("PROD", region, day, "ERROR", "CONSOLIDE", str(e), conn)
                 print(f"Erreur région {region} | {day} : {e}")
 
-get_save_production()
+
+def get_save_production_regions_tempsreel(start_date, end_date, regions, conn):
+    """
+    Import de la production par jour et par région
+    """
+    prod = Production()
+
+    for day in daterange(start_date, end_date):
+        day_start = f"{day}T00:00:00+00:00"
+        day_end = f"{day}T23:59:59+00:00"
+
+        for region in regions:
+            try:
+                print(f"Import production | Région {region} | {day}")
+
+                # 1 appel API
+                df = fetch_production_tempsreel(
+                    region=region,
+                    start_datetime=day_start,
+                    end_datetime=day_end
+                )
+
+                if df.empty:
+                    log_import("PROD", region, day, "WARNING", "REALTIME","Aucune donnée",conn)
+                    continue
+
+                # vérification des données : si les deux productions éolien et solaire sont nulles → log warning et pas d'insertion
+                # Vérifie colonnes présentes
+                if {"tch_eolien", "tch_solaire"}.issubset(df.columns):
+                    eolien_sum = df["tch_eolien"].fillna(0).sum()
+                    solaire_sum = df["tch_solaire"].fillna(0).sum()
+                    if eolien_sum == 0 and solaire_sum == 0:
+                        log_import("PROD", region, day, "WARNING", "REALTIME","Valeurs nulles",conn)
+                        continue
+
+                # 2 insertion immédiate
+                prod.save_lot(df,"REALTIME", conn)
+
+                # 3 log succès
+                log_import("PROD", region, day, "SUCCESS", "REALTIME",None,conn)
+
+            except Exception as e:
+                conn.rollback()
+                log_import("PROD", region, day, "ERROR", "REALTIME", str(e), conn)
+                print(f"Erreur région {region} | {day} : {e}")
+
+def get_save_production_regions(start_date, end_date, regions, conn):
+    """
+    Import de la production par jour et par région en fonction de la disponibilité des données (consolidées ou temps réel)
+    """
+    prod = Production()
+
+    #ne pas d'appel au delà de la date max des données consolidées
+    max_date_consolidee = get_max_date_consolidee()
+    if end_date < max_date_consolidee:
+        #periode entièrement dans les données consolidées
+        get_save_production_regions_consolidee(start_date, end_date, regions, conn)
+    elif start_date > max_date_consolidee:
+        #periode entièrement dans les données en temps réel
+        get_save_production_regions_tempsreel(start_date, end_date, regions, conn)
+    else:
+        #periode mixte : on traite en deux fois
+        print(f"Attention période mixte : données consolidées jusqu'au {max_date_consolidee} | données temps réel à partir du {max_date_consolidee + timedelta(days=1)}")
+        #traitement des données consolidées
+        get_save_production_regions_consolidee(start_date, max_date_consolidee, regions, conn)
+        #traitement des données temps réel
+        get_save_production_regions_tempsreel(max_date_consolidee + timedelta(days=1), end_date, regions, conn)
+
+    
+
+###get_save_production()
 
 # def get_save_production_regions_old(debut_date, fin_date, region=None):
 

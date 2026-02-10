@@ -72,6 +72,8 @@ def get_installations(type_installation,code_region,code_departement,conn):
                 break
             
             print("Traitement de {} installations {} pour la région {} et le département {} (offset={})...".format(batch_count,type_installation,code_region,code_departement,offset_val))
+            #remplace les valeurs NaN par None pour éviter les erreurs d'insertion en base
+            df_batch=df_batch.where(pd.notnull(df_batch), None) 
             # on sauvegarde les données du batch courant dans la bdd
             result = installation.save_lot(df_batch,conn)
 

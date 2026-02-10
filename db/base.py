@@ -162,7 +162,7 @@ class Database:
                 (
                     id_centrale bigserial,
                     codeeicresourceobject text UNIQUE,
-                    codeiris bigint null,
+                    codeiris text null,
                     codeinseecommune integer not null,
                     codeepci text null,
                     num_dep int not null,
@@ -186,7 +186,7 @@ class Database:
                 create table stations_centrales
                 (
                     id_station_centrale bigserial,
-                    id_station bigserial not null,
+                    id_station bigint not null,
                     id_centrale bigint not null,
                     distance_km numeric(6,2),-- clean -> round sur 2 digits valeur calculée
                     ordre integer, -- calcul : du plus proche au plus éloigné
@@ -206,7 +206,7 @@ class Database:
                 create table meteo
                 (
                     id_meteo bigserial,
-                    id_station bigserial not null,
+                    id_station bigint not null,
                     validity_time timestamp with time zone not null,
                     vitesse_vent numeric(6,1),
                     rayonnement_solaire numeric(8,1),
@@ -228,6 +228,7 @@ class Database:
                     prod_heure time without time zone,
                     prod_eolien numeric(8,1), --(version1)
                     prod_solaire numeric(8,1),--(version1)
+                    source text not null default 'REALTIME', -- REALTIME ou CONSOLIDE
                     CONSTRAINT production_pkey PRIMARY KEY(id_production),
                     CONSTRAINT production_unique UNIQUE (num_region, date_heure),                    
                     CONSTRAINT fk_production_regions FOREIGN KEY (num_region)
@@ -237,14 +238,25 @@ class Database:
             # table log import données de production
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS import_log_production (
-                    id SERIAL PRIMARY KEY,
+                    id bigserial,
                     code_insee_region VARCHAR(3),
                     date_jour DATE,
                     status VARCHAR(10), -- SUCCESS / ERROR
+                    source VARCHAR(20), -- CONSOLIDE / REALTIME
                     message TEXT,
-                    created_at TIMESTAMP DEFAULT now(),
-                    UNIQUE (code_insee_region, date_jour)
+                    created_at TIMESTAMP DEFAULT now()
                 );
+            """)
+             # table log import données de météo
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS import_log_meteo (
+                    id bigserial,
+                    station text,
+                    date_jour DATE,
+                    status VARCHAR(10), -- SUCCESS / ERROR
+                    source VARCHAR(20), -- CLIM / OBS / PREV
+                    message TEXT,
+                    created_at TIMESTAMP DEFAULT now());
             """)
             print("Tables créées avec succès.")
         except Exception as e:

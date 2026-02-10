@@ -1,8 +1,7 @@
-import sys
-from pathlib import Path
-
+#import sys
+#from pathlib import Path
 # Ajouter le répertoire parent au chemin Python
-sys.path.insert(0, str(Path(__file__).parent.parent))
+#sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
 import requests
@@ -22,14 +21,14 @@ dotenv.load_dotenv()
 #if not TOKEN:
 #    raise ValueError("TOKEN_METEO_FRANCE non trouvé dans le fichier .env")
 
-# if os.getenv('MODE') == "PROD":
-#     HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
+if os.getenv('MODE') == "PROD":
+    HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
 
-# if os.getenv('MODE') == "DEV":
-#     # pour appel curl sous windows
-#     HEADERS = {"Authorization": f"Bearer {get_valid_token_debugwindows()}"}
+if os.getenv('MODE') == "DEV":
+    # pour appel curl sous windows
+    HEADERS = {"Authorization": f"Bearer {get_valid_token_debugwindows()}"}
 
-HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
+#HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
 
 # --- check_station_eligibility : filtre les stations éligibles ---
 def get_save_stations_eligibles():
@@ -119,4 +118,4 @@ if __name__ == "__main__":
     else:
         print(f"Nombre de stations éligibles importées ou mises à jour : {result['total_inserted']} sur un total de {result['total_count']}.")
 
-get_save_stations_eligibles()
+    #get_save_stations_eligibles()
