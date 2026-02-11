@@ -83,7 +83,7 @@ def get_save_stations_eligibles():
         if df_stations_eligibles.empty:
             raise ValueError("Aucune station éligible. Vérifier le fichier des stations.")
         else:
-            print(f"Il existe {len(df_stations_eligibles["id_station"].unique().tolist())} stations éligibles sur toute la France continentale.")
+            print(f"Il existe {len(df_stations_eligibles['id_station'].unique().tolist())} stations éligibles sur toute la France continentale.")
 
         ## remplacer les NaN par des null avant d'enregistrer le fichier en json
         #df_stations_eligibles_clean_dict = df_stations_eligibles.replace(np.nan, None).to_dict(orient="records")
