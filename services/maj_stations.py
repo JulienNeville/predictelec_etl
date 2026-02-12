@@ -21,12 +21,6 @@ dotenv.load_dotenv()
 #if not TOKEN:
 #    raise ValueError("TOKEN_METEO_FRANCE non trouvé dans le fichier .env")
 
-if os.getenv('MODE') == "PROD":
-    HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
-
-if os.getenv('MODE') == "DEV":
-    # pour appel curl sous windows
-    HEADERS = {"Authorization": f"Bearer {get_valid_token_debugwindows()}"}
 
 #HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
 
@@ -50,6 +44,14 @@ def get_save_stations_eligibles():
         "total_errors": 0,
         "message": ""
         }
+    if os.getenv('MODE') == "PROD":
+        print("Mode de fonctionnement : PROD - AVEC DOCKER")
+        HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
+
+    if os.getenv('MODE') == "DEV":
+        # pour appel curl sous windows
+        print("Mode de fonctionnement : DEV - SANS DOCKER")
+        HEADERS = {"Authorization": f"Bearer {get_valid_token_debugwindows()}"}
     try:
         db.connect()        
         df_stations_data = pd.DataFrame()
