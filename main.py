@@ -13,7 +13,7 @@ def main(action=None):
     #MODE CLI
     if action is None:
         parser = argparse.ArgumentParser(description="Gestion des opérations Predictelec")
-        parser.add_argument("action", choices=["INIT", "MAJ_STRUCTURES", "MAJ_STATIONS", "MAJ_PROD", "MAJ_METEO","MAJ_METEO_PREC", "MAJ_PREVISION"])
+        parser.add_argument("action", choices=["INIT", "MAJ_STRUCTURES", "MAJ_STATIONS","COMBINE_STRUCTURES" "MAJ_PROD", "MAJ_METEO","MAJ_METEO_PREC", "MAJ_PREVISION"])
 
         args = parser.parse_args()
         action=args.action
@@ -35,6 +35,9 @@ def main(action=None):
     elif action == "MAJ_STATIONS":
         print("Mise à jour uniquement des stations météo...")
         maj_stations()
+    elif action == "COMBINE_STRUCTURES":
+        print("Mise à jour uniquement des combinaisons installations/stations...")
+        combine()
     elif action == "MAJ_PROD":
         print("Mise à jour journalière des données de production...")
         maj_production_mois_precedent()
