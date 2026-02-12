@@ -65,6 +65,8 @@ def get_save_stations_eligibles():
                 data = r.json()
                 if (not pd.json_normalize(data).empty):
                     df_stations_data = pd.concat([df_stations_data, pd.json_normalize(data)], ignore_index=True)
+		print("Colonnes disponibles :", df_stations_data.columns.tolist())
+		print("Nombre total lignes :", df_stations_data.shape[0])
                 print(f"Données des stations du département {dpt} récupérées.")
                 time.sleep(1) #attente de 1  seconde pour ne pas sursolliciter le serveur : limite de 50 requêtes par minute
                 
@@ -72,7 +74,12 @@ def get_save_stations_eligibles():
         df_stations_data.rename(columns={"geo_id_insee":"id_station","lat": "station_latitude","lon": "station_longitude"}, inplace=True)
         Total_count = df_stations_data.shape[0]
         # on supprime les colonnes inutiles, on ne garde qu'un enregistrement par station et on supprime les stations qui n'ont pas de coordonnées geographiques ou ni mesure de vent ni mesure de rayonnement
-        df_stations_eligibles = df_stations_data[["id_station","station_latitude","station_longitude","ff","ray_glo01"]].copy()
+        #df_stations_eligibles = df_stations_data[["id_station","station_latitude","station_longitude","ff","ray_glo01"]].copy()
+	required_cols = ["id_station","station_latitude","station_longitude","ff","ray_glo01"]
+	missing_cols = [col for col in required_cols if col not in df_stations_data.columns]
+	if missing_cols:
+	    raise ValueError(f"Colonnes manquantes dans les données API : {missing_cols}")
+	df_stations_eligibles = df_stations_data[required_cols].copy()
         df_stations_eligibles.drop_duplicates(subset=["id_station"],keep='first',inplace=True)
         df_stations_eligibles.dropna(subset=["ff","ray_glo01"],how='all',inplace=True)
         df_stations_eligibles["mesure_vent"] = np.where(df_stations_eligibles["ff"].notna(), True, False)
