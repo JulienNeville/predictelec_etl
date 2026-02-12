@@ -15,6 +15,7 @@ def get_valid_token():
     if _token_cache and time.time() < _token_cache["expires_at"]:
         return _token_cache["access_token"]
 
+    print(os.getenv('METEOFRANCE_BASIC_AUTH')  )
     headers = {
         "Authorization": f"Basic {os.getenv('METEOFRANCE_BASIC_AUTH')}",
         "Content-Type": "application/x-www-form-urlencoded"
