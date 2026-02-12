@@ -167,7 +167,7 @@ def combine_installations_stations_eligibles():
             output_dict["total_inserted"] = df_installations_station_meteo.shape[0]
         else:
             output_dict["total_errors"] = df_installations_station_meteo.shape[0]
-        print("Association terminée : fichier installations_avec_station_meteo.csv")
+        print("Association terminéee : {} associations installation-station météo réalisées.".format(df_installations_station_meteo.shape[0]))
     except Exception as e:
         print(f"Erreur lors de l'association des installations avec les stations météo : {e}")
     finally:
