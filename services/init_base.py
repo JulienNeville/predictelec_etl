@@ -27,8 +27,10 @@ def init():
     password=os.getenv('DB_PASSWORD'),        
     port=os.getenv('DB_PORT')
     )
-    # Créer la base de données
-    db.create_base()
+    if os.getenv('MODE') == "DEV":
+        print("Mode de fonctionnement : DEV - SANS DOCKER")
+        # Créer la base de données
+        db.create_base()
     # Créer les tables nécessaires
     db.create_tables()
     # Connection
