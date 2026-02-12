@@ -23,6 +23,14 @@ dotenv.load_dotenv()
 
 
 #HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
+if os.getenv('MODE') == "PROD":
+    print("Mode de fonctionnement : PROD - AVEC DOCKER")
+    HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
+
+if os.getenv('MODE') == "DEV":
+    # pour appel curl sous windows
+    print("Mode de fonctionnement : DEV - SANS DOCKER")
+    HEADERS = {"Authorization": f"Bearer {get_valid_token_debugwindows()}"}
 
 # --- check_station_eligibility : filtre les stations éligibles ---
 def get_save_stations_eligibles():
@@ -44,14 +52,7 @@ def get_save_stations_eligibles():
         "total_errors": 0,
         "message": ""
         }
-    if os.getenv('MODE') == "PROD":
-        print("Mode de fonctionnement : PROD - AVEC DOCKER")
-        HEADERS = {"Authorization": f"Bearer {get_valid_token()}"}
 
-    if os.getenv('MODE') == "DEV":
-        # pour appel curl sous windows
-        print("Mode de fonctionnement : DEV - SANS DOCKER")
-        HEADERS = {"Authorization": f"Bearer {get_valid_token_debugwindows()}"}
     try:
         db.connect()        
         df_stations_data = pd.DataFrame()
