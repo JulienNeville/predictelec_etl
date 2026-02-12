@@ -70,8 +70,8 @@ def get_save_stations_eligibles():
                 data = r.json()
                 if (not pd.json_normalize(data).empty):
                     df_stations_data = pd.concat([df_stations_data, pd.json_normalize(data)], ignore_index=True)
-                print("Colonnes disponibles :", df_stations_data.columns.tolist())
-                print("Nombre total lignes :", df_stations_data.shape[0])
+                #print("Colonnes disponibles :", df_stations_data.columns.tolist())
+                #print("Nombre total lignes :", df_stations_data.shape[0])
                 print(f"Données des stations du département {dpt} récupérées.")
                 time.sleep(1) #attente de 1  seconde pour ne pas sursolliciter le serveur : limite de 50 requêtes par minute
                 
