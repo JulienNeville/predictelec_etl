@@ -33,8 +33,8 @@ def main(action=None):
         maj_stations()
         combine()
     elif action == "MAJ_STATIONS":
-	print("Mise à jour uniquement des stations météo...")
-	maj_stations()
+        print("Mise à jour uniquement des stations météo...")
+        maj_stations()
     elif action == "MAJ_PROD":
         print("Mise à jour journalière des données de production...")
         maj_production_mois_precedent()
