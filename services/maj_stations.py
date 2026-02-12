@@ -60,6 +60,8 @@ def get_save_stations_eligibles():
             liste_dpt=Territoire.liste_departements(region,db.conn)
             for dpt in liste_dpt:
                 url=f"https://public-api.meteofrance.fr/public/DPPaquetObs/v1/paquet/horaire?id-departement={dpt}&format=json"
+                print("url meteofrance :", url)
+                print("headers :", HEADERS)
                 r = requests.get(url, headers=HEADERS)
                 r.raise_for_status()
                 data = r.json()
