@@ -1,7 +1,5 @@
 import argparse
-from services.init_base import init
-from services.init_base import init_views
-from services.init_base import refresh_views
+from services.init_base import init, init_views, refresh_views
 from services.maj_installations import get_save_allinstallations as maj_installations
 from services.maj_installations import save_installations_geoloc as maj_geoloc
 from services.maj_stations import get_save_stations_eligibles as maj_stations
@@ -27,6 +25,7 @@ def main(action=None):
     if action == "INIT":
         print("Initialisation base de données...")
         init()
+        init_views()
 
     elif action == "INIT_VIEWS":
         print("Initialisation des vues...")
@@ -42,23 +41,29 @@ def main(action=None):
         maj_geoloc()
         maj_stations()
         combine()
-    elif action == "MAJ_STATIONS":
-        print("Mise à jour uniquement des stations météo...")
-        maj_stations()
+
     elif action == "COMBINE_STRUCTURES":
         print("Mise à jour uniquement des combinaisons installations/stations...")
         combine()
+
+    elif action == "MAJ_STATIONS":
+        print("Mise à jour uniquement des stations météo...")
+        maj_stations()
+
     elif action == "MAJ_PROD":
-        print("Mise à jour journalière des données de production...")
+        print("Mise à jour mois précédent des données de production...")
         maj_production_mois_precedent()
+        refresh_views()
 
     elif action == "MAJ_METEO":
         print("Mise à jour journalière des données météorologiques...")
         maj_meteo_quotidien()
+        refresh_views()        
 
     elif action == "MAJ_METEO_PREC":
         print("Mise à jour mensuelle des données météorologiques...")
         maj_meteo_mois_precedent()
+        refresh_views()        
 
 if __name__ == "__main__":
     #debug
