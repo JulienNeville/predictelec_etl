@@ -39,3 +39,39 @@ def init():
     Territoire.init_dep_region(db.conn)
     # Fermer la connexion à la base de données
     db.close()
+
+def init_view():
+    """
+    Docstring for init view
+    """
+    db = base.Database(
+    host=os.getenv('DB_HOST'),
+    dbname=os.getenv('DB_NAME'),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD'),        
+    port=os.getenv('DB_PORT')
+    )
+    # Connection
+    db.connect()
+    # Créer les vues 
+    db.create_view()
+    # Fermer la connexion à la base de données
+    db.close()
+
+def refresh_view():
+    """
+    Docstring for refresh view
+    """
+    db = base.Database(
+    host=os.getenv('DB_HOST'),
+    dbname=os.getenv('DB_NAME'),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD'),        
+    port=os.getenv('DB_PORT')
+    )
+    # Connection
+    db.connect()
+    # Créer les vues 
+    db.refresh_view()
+    # Fermer la connexion à la base de données
+    db.close()

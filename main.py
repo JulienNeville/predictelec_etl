@@ -1,5 +1,7 @@
 import argparse
 from services.init_base import init
+from services.init_base import init_views
+from services.init_base import refresh_views
 from services.maj_installations import get_save_allinstallations as maj_installations
 from services.maj_installations import save_installations_geoloc as maj_geoloc
 from services.maj_stations import get_save_stations_eligibles as maj_stations
@@ -13,7 +15,7 @@ def main(action=None):
     #MODE CLI
     if action is None:
         parser = argparse.ArgumentParser(description="Gestion des opérations Predictelec")
-        parser.add_argument("action", choices=["INIT", "MAJ_STRUCTURES", "MAJ_STATIONS","COMBINE_STRUCTURES", "MAJ_PROD", "MAJ_METEO","MAJ_METEO_PREC", "MAJ_PREVISION"])
+        parser.add_argument("action", choices=["INIT", "INIT_VIEWS", "REFRESH_VIEWS", "MAJ_STRUCTURES", "MAJ_STATIONS","COMBINE_STRUCTURES", "MAJ_PROD", "MAJ_METEO","MAJ_METEO_PREC", "MAJ_PREVISION"])
 
         args = parser.parse_args()
         action=args.action
@@ -25,6 +27,14 @@ def main(action=None):
     if action == "INIT":
         print("Initialisation base de données...")
         init()
+
+    elif action == "INIT_VIEWS":
+        print("Initialisation des vues...")
+        init_views()
+
+    elif action == "REFRESH_VIEWS":
+        print("Actualisation des vues...")
+        refresh_views()
 
     elif action == "MAJ_STRUCTURES":
         print("Mise à jour mensuelle des installations et des stations...")

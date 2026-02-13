@@ -105,6 +105,108 @@ class Database:
             if conn:
                 conn.close()
 
+    def create_view(self):
+        try:
+            self.connect()
+            self.cursor.execute("""
+                /*Création de la table méteo ramené à la région par tranche de 15 minutes
+                    pour correspondre aux données de production*/
+                CREATE MATERIALIZED VIEW mv_meteo_region_15min AS
+                WITH station_region AS (
+                    SELECT DISTINCT
+                        sc.id_station,
+                        d.num_region
+                    FROM stations_centrales sc
+                    JOIN centrales c ON sc.id_centrale = c.id_centrale
+                    JOIN departements d ON c.num_dep = d.num_dep
+                    WHERE c.codetechnologie IN ('TERRE', 'PHOTV')
+                    AND (
+                            (c.codetechnologie = 'TERRE' AND sc.ordre = 1)
+                            OR (c.codetechnologie = 'PHOTV')
+                        )
+                ),
+                meteo_15 AS (
+                    SELECT
+                        id_station,
+                        date_trunc('hour', validity_time)
+                        + floor(extract(minute FROM validity_time) / 15) * interval '15 minutes'
+                        AS validity_time_interval_15,
+                        vitesse_vent,
+                        rayonnement_solaire
+                    FROM meteo
+                )
+                SELECT
+                    sr.num_region,
+                    m15.validity_time_interval_15		AS date_heure,
+                    ROUND(AVG(m15.vitesse_vent), 2)        AS moyenne_vitesse_vent,
+                    ROUND(AVG(m15.rayonnement_solaire), 2) AS moyenne_rayonnement_solaire
+                FROM meteo_15 m15
+                JOIN station_region sr
+                ON m15.id_station = sr.id_station
+                GROUP BY
+                    sr.num_region,
+                    m15.validity_time_interval_15
+                ORDER BY
+                    sr.num_region,
+                    m15.validity_time_interval_15;
+            """)
+
+            self.cursor.execute("""
+                /*table pour entrainer le modèle ML concernant l'éolien*/
+                CREATE OR REPLACE VIEW prod_eolien_meteo AS
+                SELECT
+                    p.num_region,
+                    p.date_heure,
+                    p.prod_date,
+                    p.prod_heure,
+                    m.moyenne_vitesse_vent,
+                    p.prod_eolien
+                FROM production p
+                LEFT JOIN mv_meteo_region_15min m
+                ON m.num_region = p.num_region
+                AND m.date_heure = p.date_heure
+                WHERE m.moyenne_vitesse_vent IS NOT NULL;
+            """)
+
+            self.cursor.execute("""
+                /*table pour entrainer le modèle ML concernant le solaire*/
+                CREATE OR REPLACE VIEW prod_solaire_meteo AS
+                SELECT
+                    p.num_region,
+                    p.date_heure,
+                    p.prod_date,
+                    p.prod_heure,
+                    m.moyenne_rayonnement_solaire,
+                    p.prod_solaire
+                FROM production p
+                LEFT JOIN mv_meteo_region_15min m
+                ON m.num_region = p.num_region
+                AND m.date_heure = p.date_heure
+                WHERE m.moyenne_rayonnement_solaire IS NOT NULL;
+                                """)
+
+            self.conn.commit()
+            print("Vue view_stations_centrales créée ou remplacée avec succès.")
+        except Exception as e:
+            print(f"Erreur lors de la création de la vue : {e}")
+        finally:
+            self.close()
+
+    def refresh_view(self):
+        try:
+            self.connect()
+            # attention : la vue doit déjà exister, sinon erreur
+            # attention : l'ordre est important 
+            self.cursor.execute("""
+                /*Commande pour mettre à jour la vue*/
+                REFRESH MATERIALIZED VIEW mv_meteo_region_15min;
+            """)
+            self.conn.commit()
+            print("Vue mv_meteo_region_15min actualisée avec succès.")
+        except Exception as e:
+            print(f"Erreur lors de l'actualisation de la vue : {e}")
+        finally:
+            self.close()
 
     def create_tables(self):
         try:
