@@ -1,7 +1,7 @@
+name: predictelec
 services:
   postgres:
     image: postgres:16
-    container_name: predictelec_postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -33,3 +33,5 @@ services:
       METEOFRANCE_BASIC_AUTH: ${METEOFRANCE_BASIC_AUTH}
 volumes:
   postgres_data:
+    external: true
+    name: dst_predictelec_postgres_data
