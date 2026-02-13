@@ -1,20 +1,12 @@
 #!/bin/bash
+#fichier environnement pour les variables d'environnement (pas de .env pour ne pas risquer de le commiter par erreur, et pas d'export dans le .env pour pouvoir les utiliser dans docker compose)
+source /home/ubuntu/.predictelec_env
 
 # autorise erreur sans stopper le script : pas -e, sinon on ne récupère pas l'erreur à envoyer par mail
 set +e
 
 # Empêche plusieurs exécutions en même temps
 LOCK_FILE="/tmp/maj_meteo_prec.lock"
-
-if [ -f "$LOCK_FILE" ]; then
-    echo "Script déjà en cours d'exécution." >> "$LOG_FILE"
-    exit 1
-fi
-
-touch "$LOCK_FILE"
-# tue le fichier lock en cas d'interruption (pas de blocage à cause du fichier lock présent alors que rien ne tourne)
-trap "rm -f $LOCK_FILE" EXIT
-
 
 # Aller dans le dossier parent du dossier du script
 cd "$(dirname "$0")/.."
@@ -25,23 +17,38 @@ LOG_FILE="$LOG_DIR/maj_meteo_prec.log"
 
 mkdir -p "$LOG_DIR"
 
+if [ -f "$LOCK_FILE" ]; then
+    echo "Script déjà en cours d'exécution." >> "$LOG_FILE"
+    exit 1
+fi
+
+touch "$LOCK_FILE"
+# tue le fichier lock en cas d'interruption (pas de blocage à cause du fichier lock présent alors que rien ne tourne)
+trap "rm -f $LOCK_FILE" EXIT
+
 echo "----------------------------------------" >> "$LOG_FILE"
 echo "Début MAJ_METEO_PREC : $(date)" >> "$LOG_FILE"
 
 # Exécution du job 
 # ajout --no-deps pour ne pas relancer postgres
 docker compose run --rm --no-deps app MAJ_METEO_PREC >> "$LOG_FILE" 2>&1
+EXIT_CODE=$?
 
 #stop le script si erreur
 set -e
 
+END_TIME=$(date)
 if [ $EXIT_CODE -ne 0 ]; then
 	#on log l'erreur
-	echo "Erreur MAJ_METEO_PREC le $(date)" >> "$LOG_FILE"
+	echo "Erreur MAJ_METEO_PREC le $END_TIME : code=$EXIT_CODE" >> "$LOG_FILE"
 	#envoie de l'erreur
-	echo "Erreur MAJ_METEO_PREC le $(date)" | mail -s "ERREUR PREDICTELEC MAJ_METEO_PREC" famille.nony@sfr.fr
+    if [ -z "$ALERT_EMAIL" ]; then
+        echo "ALERT_EMAIL non définie !" >> "$LOG_FILE"
+    else
+        echo "Erreur MAJ_METEO_PREC le $END_TIME" | mail -s "ERREUR PREDICTELEC MAJ_METEO_PREC" "$ALERT_EMAIL"
+    fi
 else
-	echo "Fin MAJ_METEO_PREC : $(date)" >> "$LOG_FILE"
+	echo "Fin MAJ_METEO_PREC : $END_TIME" >> "$LOG_FILE"
 fi
 
 echo "" >> "$LOG_FILE"
