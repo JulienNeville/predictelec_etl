@@ -111,6 +111,7 @@ class Database:
             self.cursor.execute("""
                 /*Création de la table méteo ramené à la région par tranche de 15 minutes
                     pour correspondre aux données de production*/
+                DROP MATERIALIZED VIEW IF EXISTS mv_meteo_region_15min CASCADE;
                 CREATE MATERIALIZED VIEW mv_meteo_region_15min AS
                 WITH station_region AS (
                     SELECT DISTINCT
