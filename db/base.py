@@ -187,9 +187,9 @@ class Database:
                                 """)
 
             self.conn.commit()
-            print("Vue view_stations_centrales créée ou remplacée avec succès.")
+            print("Vues créées ou remplacées avec succès.")
         except Exception as e:
-            print(f"Erreur lors de la création de la vue : {e}")
+            print(f"Erreur lors de la création des vues : {e}")
         finally:
             self.close()
 
