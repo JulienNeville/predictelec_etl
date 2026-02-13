@@ -40,7 +40,7 @@ def init():
     # Fermer la connexion à la base de données
     db.close()
 
-def init_view():
+def init_views():
     """
     Docstring for init view
     """
@@ -58,7 +58,7 @@ def init_view():
     # Fermer la connexion à la base de données
     db.close()
 
-def refresh_view():
+def refresh_views():
     """
     Docstring for refresh view
     """
