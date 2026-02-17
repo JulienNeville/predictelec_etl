@@ -15,6 +15,7 @@ from models.production import Production
 from models.territoire import Territoire
 from db.base import Database
 from db.sql_utils import get_last_import_date, log_import
+from datetime import datetime
 import dotenv #pip install python-dotenv
 
 dotenv.load_dotenv()
@@ -53,42 +54,42 @@ def get_save_production():
         db.connect()
         last_consolide = get_last_import_date("PROD","CONSOLIDE", db.conn)
         last_realtime = get_last_import_date("PROD","REALTIME", db.conn) 
+        #récupère la date de début des données de production, par défaut 2026-01-01 
+        date_debut_str = os.getenv('DATE_DEBUT_PROD', '2026-01-01')
+        date_debut_prod = datetime.strptime(date_debut_str, "%Y-%m-%d").date()
 
         print("Dernière date CONSOLIDE :", last_consolide)
         print("Dernière date REALTIME :", last_realtime)
+               
+        # Période dynamique jusqu'à hier
+        end_target = date.today() - timedelta(days=1)
         
-        jour = date.today()
-        ## test période antérieure: janvier 2025
-        #jour = date(2025, 1, 15)
-        # premier jour du mois courant
-        premierjour_mois = jour.replace(day=1)
-        # dernier jour du mois précédent
-        dernierjour_moisprecedent = premierjour_mois - timedelta(days=1)
-        # premier jour du mois précédent
-        premierjour_moisprecedent = dernierjour_moisprecedent.replace(day=1)
 
-        # Par défaut : mois précédent complet
-        start_target = premierjour_moisprecedent
-        end_target = dernierjour_moisprecedent
+        ## Si déjà des imports consolidés → reprise le lendemain
+        if last_consolide:
+            conso_start = last_consolide + timedelta(days=1)
+        else:
+            # premier import historique
+            conso_start = date_debut_prod  # ou date de début officielle
 
         # période consolidée
-        conso_start = start_target
-        conso_end = min(end_target, max_date_consolidee)
-        # Si déjà des imports consolidés → reprise le lendemain
-        if last_consolide:
-            conso_start = max(conso_start, last_consolide + timedelta(days=1))
-
+        if max_date_consolidee:
+            conso_end = min(end_target, max_date_consolidee)
+        else:
+            conso_end = date_debut_prod # ou date de début officielle
+        
         # période temps réel
-        realtime_start = max(start_target, max_date_consolidee + timedelta(days=1))
-        realtime_end = end_target
-        # Si déjà des imports temps réel → reprise le lendemain (si pas déjà dans la période consolidée)
+        ## Si déjà des imports realtime → reprise le lendemain
         if last_realtime:
-            realtime_start = max(realtime_start, last_realtime + timedelta(days=1))
-
+            start_target = last_realtime + timedelta(days=1)
+        else:
+            start_target = date_debut_prod  # ou date de début officielle
+        
+        realtime_start = max(start_target, conso_end)
 
 
         liste_region = Territoire.liste_regions(db.conn)
-        if conso_start <= conso_end:
+        if conso_start < conso_end:
             print(f"Import CONSOLIDE du {conso_start} au {conso_end}")
             get_save_production_regions_consolidee(
                 conso_start, conso_end, liste_region, db.conn
@@ -96,10 +97,10 @@ def get_save_production():
         else:
             print("Aucune donnée CONSOLIDE à importer")
         
-        if realtime_start <= realtime_end:
-            print(f"Import REALTIME du {realtime_start} au {realtime_end}")
+        if realtime_start <= end_target:
+            print(f"Import REALTIME du {realtime_start} au {end_target}")
             get_save_production_regions_tempsreel(
-                realtime_start, realtime_end, liste_region, db.conn
+                realtime_start, end_target, liste_region, db.conn
             )
         else:
             print("Aucune donnée REALTIME à importer")      
