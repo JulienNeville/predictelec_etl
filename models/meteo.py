@@ -50,3 +50,41 @@ class Meteo:
             isuccess = False
 
         return isuccess
+
+    def save_forecast(self,df,conn):
+            ## Fonction pour sauvegarder les données météo dans la bdd
+            print("sauvegarde des prévisions météo...")
+            isuccess = True
+
+            sql = """
+                INSERT INTO forecast (
+                    id_station,
+                    forecast_time,
+                    vitesse_vent,
+                    rayonnement_solaire
+                )               
+                VALUES (%s, %s, %s, %s)
+            """
+
+            try:
+                cur = conn.cursor()
+                cur.execute("TRUNCATE TABLE forecast;")
+                records = [
+                    (
+                        row.id_station,
+                        row.forecast_time,
+                        row.vitesse_vent,
+                        row.rayonnement_solaire
+                    )
+                    for row in df.itertuples(index=False)
+                ]
+
+                execute_batch(cur, sql, records, page_size=1000)
+                conn.commit()
+                print(f"{len(records)} lignes de prévisions meteo sauvegardées en base")
+            except Exception as e:
+                conn.rollback()
+                print(f"Erreur lors de la sauvegarde des prévisions météo : {e}")
+                isuccess = False
+
+            return isuccess

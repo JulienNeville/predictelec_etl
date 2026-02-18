@@ -105,6 +105,39 @@ class Database:
             if conn:
                 conn.close()
 
+    def create_forecast_table(self):
+        try:
+            self.conn = psycopg2.connect(
+                host=self.host,
+                dbname=self.dbname,
+                user=self.user,
+                password=self.password,
+                port=self.port
+            )
+            self.cursor = self.conn.cursor()
+
+            self.cursor.execute("""
+                DROP TABLE IF EXISTS forecast CASCADE;
+                CREATE TABLE forecast
+                (
+                    id_forecast bigserial,
+                    id_station bigserial not null,
+                    forecast_time timestamp with time zone not null,
+                    vitesse_vent numeric(6,1),
+                    rayonnement_solaire numeric(12,1),
+                    constraint forecast_pkey primary key(id_forecast),
+                    CONSTRAINT forecast_ukey UNIQUE (id_station,forecast_time),
+                    CONSTRAINT fk_forecast_stations foreign key (id_station)
+                    references stations(id_station)
+                );
+            """)
+            print("Table forecast créée avec succès.")
+        except Exception as e:
+            print(f"Erreur à la création de la table forecast: {e}")
+        finally:
+            self.conn.commit()
+            self.cursor.close()
+            self.conn.close()
 
     def create_tables(self):
         try:
@@ -244,6 +277,22 @@ class Database:
                     message TEXT,
                     created_at TIMESTAMP DEFAULT now(),
                     UNIQUE (code_insee_region, date_jour)
+                );
+            """)
+
+            self.cursor.execute("""
+                DROP TABLE IF EXISTS forecast CASCADE;
+                CREATE TABLE forecast
+                (
+                    id_forecast bigserial,
+                    id_station bigserial not null,
+                    forecast_time timestamp with time zone not null,
+                    vitesse_vent numeric(6,1),
+                    rayonnement_solaire numeric(8,1),
+                    constraint forecast_pkey primary key(id_forecast),
+                    CONSTRAINT forecast_ukey UNIQUE (id_station,forecast_time),
+                    CONSTRAINT fk_forecast_stations foreign key (id_station)
+                    references stations(id_station)
                 );
             """)
             print("Tables créées avec succès.")

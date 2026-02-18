@@ -1,4 +1,5 @@
 import argparse
+import os
 from services.init_base import init
 from services.maj_installations import get_save_allinstallations as maj_installations
 from services.maj_installations import save_installations_geoloc as maj_geoloc
@@ -6,6 +7,9 @@ from services.maj_stations import get_save_stations_eligibles as maj_stations
 from services.combine_installations_stations import combine_installations_stations_eligibles as combine
 from services.maj_meteo import get_save_meteo_hier as maj_meteo_quotidien
 from services.maj_production import get_save_production as maj_production_mois_precedent
+from services.get_forecast import get_forecast_stations, get_coverage_ids
+from api.api_meteo import get_valid_token
+from db.base import Database
 
 def main(action=None):
     #MODE CLI
@@ -39,10 +43,16 @@ def main(action=None):
         print("Mise à jour journalière des données météorologiques...")
         maj_meteo_quotidien()
 
+    elif action == "GET_FORECAST":
+        print("Récupération des prévisions météorologiques...")
+        coverage_ids = get_coverage_ids()
+        print(coverage_ids)
+        get_forecast_stations(coverage_ids,height=10)
+
 if __name__ == "__main__":
     pass
     # main("INIT")
     # main("MAJ_STRUCTURES")
     # main("MAJ_PROD")
-    main("MAJ_METEO")
-
+    # main("MAJ_METEO")
+    main("GET_FORECAST")
