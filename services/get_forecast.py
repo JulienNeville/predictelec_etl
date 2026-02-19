@@ -37,6 +37,7 @@ def get_coverage_ids():
     weather_parameters = {"vent": "Force du vent en niveaux hauteur.",
                           "rayonnement": "Flux solaire"}
     capabilities_url = "https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCapabilities?service=WCS&version=2.0.1&language=fre"
+    print("meteo_header():",meteo_header())
     response = requests.get(capabilities_url,headers=meteo_header())
     with open("capabilities.xml", "w", encoding="utf-8") as f:
         f.write(response.text)
