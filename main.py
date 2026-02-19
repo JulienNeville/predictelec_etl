@@ -68,7 +68,7 @@ def main(action=None):
 
     elif action == "MAJ_PREVISION":
         print("Récupération des prévisions météorologiques...")
-        maj_prevision
+        maj_prevision()
 
 if __name__ == "__main__":
     #debug
@@ -77,6 +77,7 @@ if __name__ == "__main__":
     #main("MAJ_PROD")
     #main("MAJ_METEO")
     #main("MAJ_METEO_PREC")
-    #main("GET_FORECAST")
+    #main("MAJ_PREVISION")
+    
     #prod
     main()
