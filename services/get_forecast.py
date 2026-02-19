@@ -7,6 +7,7 @@ from db.base import Database
 import pandas as pd
 import time
 from models.meteo import Meteo
+from models.station import Station
 from api.api_meteo import get_valid_token, get_valid_token_debugwindows
 
 dotenv.load_dotenv()
@@ -30,7 +31,7 @@ def maj_prevision():
     Récupère les prévisions météorologiques pour les stations météo associées à une centrale et les enregistre en base de données.
     '''
     coverage_ids = get_coverage_ids()
-    print(coverage_ids)
+    print("coverage_ids:", coverage_ids)
     get_forecast_stations(coverage_ids,height=10)
 
 def get_coverage_ids():
@@ -40,11 +41,15 @@ def get_coverage_ids():
     weather_parameters = {"vent": "Force du vent en niveaux hauteur.",
                           "rayonnement": "Flux solaire"}
     capabilities_url = "https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCapabilities?service=WCS&version=2.0.1&language=fre"
-    print("meteo_header():",meteo_header())
+    #print("meteo_header():",meteo_header())
     response = requests.get(capabilities_url,headers=meteo_header())
-    with open("capabilities.xml", "w", encoding="utf-8") as f:
-        f.write(response.text)
+
+    if response.status_code != 200:
+        print(f"Failed to retrieve capabilities: {response.status_code},response: {response.text}")
+        return None    
     if response.status_code == 200:
+        with open("capabilities.xml", "w", encoding="utf-8") as f:
+            f.write(response.text)
         root = ET.fromstring(response.text)
         ns = {
             "wcs": "http://www.opengis.net/wcs/2.0",
@@ -191,15 +196,22 @@ def get_forecast_stations(coverage_ids,height):
         password=os.getenv('DB_PASSWORD'),        
         port=os.getenv('DB_PORT')
     )
-    db.connect()
-    query = "select sc.id_station, s.station_latitude, s.station_longitude, s.mesure_vent, s.mesure_rayonnement from stations_centrales AS sc JOIN stations AS s ON sc.id_station = s.id_station"
-    results = db.fetch_all(query)
-    df = pd.DataFrame(results, columns=["id_station", "station_latitude", "station_longitude", "mesure_vent", "mesure_rayonnement"])
-    df_vent = df[df["mesure_vent"] == True].copy()
-    df_rayonnement = df[df["mesure_rayonnement"] == True].copy()
-    forecast_vent = get_forecast_parameter(coverage_ids,"vent",df_vent,height)
-    forecast_rayonnement = get_forecast_parameter(coverage_ids,"rayonnement",df_rayonnement,height)
-    df_forecast = convert_to_df(forecast_vent, forecast_rayonnement)
-    meteo = Meteo()
-    meteo.save_forecast(df_forecast,db.conn)
+    station = Station()
+    try:
+        db.connect()
+        df = station.getlistStationUtile(db.conn)
+        #query = "select sc.id_station, s.station_latitude, s.station_longitude, s.mesure_vent, s.mesure_rayonnement from stations_centrales AS sc JOIN stations AS s ON sc.id_station = s.id_station"
+        #results = db.fetch_all(query)
+        #df = pd.DataFrame(results, columns=["id_station", "station_latitude", "station_longitude", "mesure_vent", "mesure_rayonnement"])
+        df_vent = df[df["mesure_vent"] == True].copy()
+        df_rayonnement = df[df["mesure_rayonnement"] == True].copy()
+        forecast_vent = get_forecast_parameter(coverage_ids,"vent",df_vent,height)
+        forecast_rayonnement = get_forecast_parameter(coverage_ids,"rayonnement",df_rayonnement,height)
+        df_forecast = convert_to_df(forecast_vent, forecast_rayonnement)
+        meteo = Meteo()
+        meteo.save_forecast(df_forecast,db.conn)
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        return
+    
     
