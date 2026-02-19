@@ -1,2 +1,7 @@
 .env
-.env.*
+.env.local
+__pycache__/
+services/__pycache__/
+api/__pycache__/
+db/__pycache__/
+*.pyc

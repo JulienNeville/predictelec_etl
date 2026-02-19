@@ -15,7 +15,10 @@ def meteo_header():
     '''
     Récupère un token d'authentification valide pour l'API Météo France et retourne les headers à utiliser pour les requêtes.
     '''
-    TOKEN = get_valid_token()
+    if os.getenv('MODE') == "PROD":
+        TOKEN = get_valid_token()
+    else:
+        TOKEN = get_valid_token_debugwindows()
     #TOKEN = os.getenv("TOKEN_METEO_FRANCE")
     if not TOKEN:
         raise ValueError("Pas de TOKEN METEO_FRANCE valide généré.")
