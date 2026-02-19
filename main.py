@@ -7,7 +7,7 @@ from services.combine_installations_stations import combine_installations_statio
 from services.maj_meteo import get_save_meteo_hier as maj_meteo_quotidien
 from services.maj_meteo import import_meteo_previous_month as maj_meteo_mois_precedent
 from services.maj_production import get_save_production as maj_production_mois_precedent
-from services.get_forecast import get_forecast_stations, get_coverage_ids
+from services.get_forecast import maj_prevision
 
 def main(action=None):
     print(f"Action donnée : {action}")
@@ -66,11 +66,9 @@ def main(action=None):
         maj_meteo_mois_precedent()
         refresh_views()        
 
-    elif action == "GET_FORECAST":
+    elif action == "MAJ_PREVISION":
         print("Récupération des prévisions météorologiques...")
-        coverage_ids = get_coverage_ids()
-        print(coverage_ids)
-        get_forecast_stations(coverage_ids,height=10)
+        maj_prevision
 
 if __name__ == "__main__":
     #debug
