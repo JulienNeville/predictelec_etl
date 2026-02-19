@@ -366,7 +366,7 @@ class Database:
                 CREATE TABLE forecast
                 (
                     id_forecast bigserial,
-                    id_station bigserial not null,
+                    id_station bigint not null,
                     forecast_time timestamp with time zone not null,
                     vitesse_vent numeric(6,1),
                     rayonnement_solaire numeric(12,1),
@@ -374,6 +374,21 @@ class Database:
                     CONSTRAINT forecast_ukey UNIQUE (id_station,forecast_time),
                     CONSTRAINT fk_forecast_stations foreign key (id_station)
                     references stations(id_station)
+                );
+            """)
+            self.cursor.execute("""
+                DROP TABLE IF EXISTS forecast_archive CASCADE;
+                CREATE TABLE forecast_archive
+                (
+                    id bigserial,
+                    date_archivage timestamp without time zone default now(),            
+                    id_forecast bigint not null,
+                    id_station bigint not null,
+                    forecast_time timestamp with time zone not null,
+                    vitesse_vent numeric(6,1),
+                    rayonnement_solaire numeric(12,1),
+                    constraint forecast_archive_pkey primary key(id),
+                    CONSTRAINT forecast_archive_ukey UNIQUE (date_archivage,id_station,forecast_time)
                 );
             """)
             print("Tables créées avec succès.")

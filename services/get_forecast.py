@@ -1,4 +1,3 @@
-from api.api_meteo import get_valid_token
 import requests
 from datetime import datetime, timedelta
 import xml.etree.ElementTree as ET
@@ -8,6 +7,7 @@ from db.base import Database
 import pandas as pd
 import time
 from models.meteo import Meteo
+from api.api_meteo import get_valid_token, get_valid_token_debugwindows
 
 dotenv.load_dotenv()
 
@@ -15,12 +15,20 @@ def meteo_header():
     '''
     Récupère un token d'authentification valide pour l'API Météo France et retourne les headers à utiliser pour les requêtes.
     '''
-    # TOKEN = get_valid_token()
-    TOKEN = os.getenv("TOKEN_METEO_FRANCE")
+    TOKEN = get_valid_token()
+    #TOKEN = os.getenv("TOKEN_METEO_FRANCE")
     if not TOKEN:
         raise ValueError("Pas de TOKEN METEO_FRANCE valide généré.")
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
     return HEADERS
+
+def maj_prevision():
+    '''
+    Récupère les prévisions météorologiques pour les stations météo associées à une centrale et les enregistre en base de données.
+    '''
+    coverage_ids = get_coverage_ids()
+    print(coverage_ids)
+    get_forecast_stations(coverage_ids,height=10)
 
 def get_coverage_ids():
     '''

@@ -54,6 +54,20 @@ class Meteo:
             isuccess = False
 
         return isuccess
+    
+    def archive_forecast(self,conn):
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO forecast_archive(id_forecast, id_station, forecast_time, vitesse_vent, rayonnement_solaire, date_archivage)
+                SELECT id_forecast, id_station, forecast_time, vitesse_vent, rayonnement_solaire, CURRENT_TIMESTAMP FROM forecast;
+            """)
+            cur.execute("TRUNCATE TABLE forecast;")
+            conn.commit()
+            print("Prévisions météo archivées avec succès.")
+        except Exception as e:
+            conn.rollback()
+            print(f"Erreur lors de l'archivage des prévisions météo : {e}")
 
     def save_forecast(self,df,conn):
             ## Fonction pour sauvegarder les données météo dans la bdd
@@ -72,7 +86,9 @@ class Meteo:
 
             try:
                 cur = conn.cursor()
-                cur.execute("TRUNCATE TABLE forecast;")
+                #archiver les prévisions existantes avant de les écraser
+                self.archive_forecast(conn)
+                #cur.execute("TRUNCATE TABLE forecast;")
                 records = [
                     (
                         row.id_station,
