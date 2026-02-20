@@ -2,6 +2,7 @@ import requests
 from datetime import datetime, timedelta
 import xml.etree.ElementTree as ET
 import dotenv
+import io
 import os
 from db.base import Database
 import pandas as pd
@@ -51,6 +52,13 @@ def get_coverage_ids():
         #debug : sauvegarder la réponse XML dans un fichier pour l'inspecter
         #with open("capabilities.xml", "w", encoding="utf-8") as f:
         #    f.write(response.text)
+        #test avec read_xml pour extraire les CoverageSummary et leurs CoverageId
+        #df=pd.read_xml(io.StringIO(response.text), xpath=".//wcs:CoverageSummary", namespaces={"wcs": "http://www.opengis.net/wcs/2.0", "ows": "http://www.opengis.net/ows/2.0"})
+        #df2=pd.read_xml(io.StringIO(response.text))
+        #print(df.head())
+        #print(df.columns.tolist())
+        #print(df2.head())
+        #print(df2.columns.tolist())
         root = ET.fromstring(response.text)
         ns = {
             "wcs": "http://www.opengis.net/wcs/2.0",
@@ -115,13 +123,15 @@ def get_forecast_parameter(coverage_ids,parameter,df,height):
     j=0
     stations_dict = {}
     for index, row in df.iterrows():
+        # limiter à 2 stations pour les tests pour ne pas faire trop de requêtes à l'API Météo France
         if j<2:
             date_dict = {}
             for date in time_steps:
                 parameter_dict = {}
                 i+=1
-                if i >=98:
-                    time.sleep(10) #attente pour ne pas sursolliciter le serveur : limite de 100 requêtes par minute
+                if i >=100:
+                    print("Attente de 60 secondes pour respecter la limite de 100 requêtes par minute de l'API Météo France...")
+                    time.sleep(60) #attente pour ne pas sursolliciter le serveur : limite de 100 requêtes par minute
                     i=0
                 latitude = row["station_latitude"]
                 longitude = row["station_longitude"]
@@ -148,7 +158,8 @@ def get_forecast_parameter(coverage_ids,parameter,df,height):
                     print(f"Failed to retrieve forecast for station {row['id_station']} at {date}")
                 date_dict[date] = parameter_dict
             stations_dict[row["id_station"]] = date_dict
-            j+=1
+            #uniquement pour les tests : limiter à 2 stations pour ne pas faire trop de requêtes à l'API Météo France
+            #j+=1
     return stations_dict
 
 def convert_to_df(forecast_vent, forecast_rayonnement):
