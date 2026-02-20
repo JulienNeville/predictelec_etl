@@ -48,8 +48,9 @@ def get_coverage_ids():
         print(f"Failed to retrieve capabilities: {response.status_code},response: {response.text}")
         return None    
     if response.status_code == 200:
-        with open("capabilities.xml", "w", encoding="utf-8") as f:
-            f.write(response.text)
+        #debug : sauvegarder la réponse XML dans un fichier pour l'inspecter
+        #with open("capabilities.xml", "w", encoding="utf-8") as f:
+        #    f.write(response.text)
         root = ET.fromstring(response.text)
         ns = {
             "wcs": "http://www.opengis.net/wcs/2.0",
