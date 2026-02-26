@@ -64,7 +64,9 @@ class Meteo:
                 INSERT INTO forecast (
                     id_station,
                     forecast_time,
+                    coverage_id_vent,
                     vitesse_vent,
+                    coverage_id_rayonnement,
                     rayonnement_solaire
                 )               
                 VALUES (%s, %s, %s, %s)
@@ -72,12 +74,13 @@ class Meteo:
 
             try:
                 cur = conn.cursor()
-                cur.execute("TRUNCATE TABLE forecast;")
                 records = [
                     (
                         row.id_station,
                         row.forecast_time,
+                        row.coverage_id_vent,
                         row.vitesse_vent,
+                        row.coverage_id_rayonnement,
                         row.rayonnement_solaire
                     )
                     for row in df.itertuples(index=False)

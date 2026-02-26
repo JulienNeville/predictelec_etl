@@ -190,4 +190,3 @@ def get_forecast_stations(coverage_ids,height):
     df_forecast = convert_to_df(forecast_vent, forecast_rayonnement)
     meteo = Meteo()
     meteo.save_forecast(df_forecast,db.conn)
-    
