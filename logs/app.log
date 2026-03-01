@@ -1,0 +1,228 @@
+2026-02-28 12:22:57,539 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:22:57.539869 ---
+
+2026-02-28 12:22:57,669 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:27:28,268 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:27:28.268516 ---
+
+2026-02-28 12:27:28,405 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:29:26,285 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:29:26.285261 ---
+
+2026-02-28 12:29:26,420 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:29:26,424 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:29:26,425 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 12:40:09,778 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:40:09.778421 ---
+
+2026-02-28 12:40:09,912 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:40:09,913 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:40:09,913 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 12:40:47,091 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 12:40:54,966 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'NoneType' object has no attribute 'items'
+2026-02-28 12:40:54,966 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 12:40:55,381 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:41:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:41:00+0000 UTC"}
+2026-02-28 12:40:55,382 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:40:55,382 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:40:55,382 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 12:40:55,793 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:41:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:41:00+0000 UTC"}
+2026-02-28 12:40:55,795 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:40:55,795 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:45:15,891 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:45:15.891840 ---
+
+2026-02-28 12:45:16,031 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:45:16,033 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:45:16,033 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 12:45:50,337 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 12:45:51,724 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'NoneType' object has no attribute 'items'
+2026-02-28 12:45:51,724 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 12:45:52,180 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:46:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:46:00+0000 UTC"}
+2026-02-28 12:45:52,183 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:45:52,183 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:45:52,184 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 12:45:52,625 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:46:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:46:00+0000 UTC"}
+2026-02-28 12:45:52,628 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:45:52,628 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:46:07,551 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:46:07.551351 ---
+
+2026-02-28 12:46:07,691 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:46:07,693 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:46:07,693 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 12:46:42,152 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 12:46:43,419 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'NoneType' object has no attribute 'items'
+2026-02-28 12:46:43,420 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 12:46:43,805 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:47:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:47:00+0000 UTC"}
+2026-02-28 12:46:43,807 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:46:43,808 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:46:43,808 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 12:46:44,204 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:47:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:47:00+0000 UTC"}
+2026-02-28 12:46:44,206 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:46:44,206 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:49:15,257 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:49:15.257600 ---
+
+2026-02-28 12:49:15,387 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:49:15,390 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:49:15,390 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 12:49:48,144 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 12:49:49,360 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'NoneType' object has no attribute 'items'
+2026-02-28 12:49:49,360 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 12:49:49,755 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:50:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:50:00+0000 UTC"}
+2026-02-28 12:49:49,757 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:49:49,758 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:49:49,758 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 12:49:50,154 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:50:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:50:00+0000 UTC"}
+2026-02-28 12:49:50,155 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:49:50,155 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:52:39,958 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:52:39.958842 ---
+
+2026-02-28 12:52:40,096 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:52:40,098 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:52:40,098 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 12:53:12,416 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+1 : 'coverage_id_vitesse_vent_'
+2026-02-28 12:53:12,416 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 12:53:26,910 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'coverage_id_vitesse_vent_'
+2026-02-28 12:53:26,910 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 12:53:33,068 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : 'NoneType' object has no attribute 'items'
+2026-02-28 12:53:33,068 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 12:53:33,456 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:54:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:54:00+0000 UTC"}
+2026-02-28 12:53:33,457 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:53:33,457 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:54:48,962 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:54:48.962910 ---
+
+2026-02-28 12:54:49,217 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:54:49,219 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:54:49,219 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 12:55:22,771 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+1 : 'coverage_id_vitesse_vent_'
+2026-02-28 12:55:22,771 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 12:55:36,234 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'coverage_id_vitesse_vent_'
+2026-02-28 12:55:36,234 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 12:55:36,617 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:56:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:56:00+0000 UTC"}
+2026-02-28 12:55:36,618 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:55:36,618 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+3.
+2026-02-28 12:55:36,618 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 12:55:37,013 [ERROR] services.get_forecast - Erreur 429. Echec de la requête récupération des coverage IDs : {"code":"900804","message":"Message throttled out","description":"You have exceeded your quota .You can access API after 2026-févr.-28 11:56:00+0000 UTC","nextAccessTime":"2026-févr.-28 11:56:00+0000 UTC"}
+2026-02-28 12:55:37,014 [ERROR] services.get_forecast - Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:55:37,014 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : Impossible de récupérer les coverage IDs pour les paramètres météorologiques. Abandon de la mise à jour des prévisions pour le jour J+4.
+2026-02-28 12:55:59,264 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T12:55:59.264910 ---
+
+2026-02-28 12:55:59,398 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 12:55:59,400 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 12:55:59,400 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 13:00:41,124 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+1 : 'coverage_id_vitesse_vent_'
+2026-02-28 13:00:41,125 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 13:02:02,298 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'coverage_id_vitesse_vent_'
+2026-02-28 13:02:02,298 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 13:02:14,819 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : 'NoneType' object has no attribute 'items'
+2026-02-28 13:02:14,820 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 13:02:23,501 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : 'NoneType' object has no attribute 'items'
+2026-02-28 13:44:40,644 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T13:44:40.644046 ---
+
+2026-02-28 13:44:40,777 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 13:44:40,778 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 13:44:40,778 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 13:46:38,445 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T13:46:38.445587 ---
+
+2026-02-28 13:46:38,575 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 13:46:38,577 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 13:46:38,577 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 13:51:14,070 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+1 : 'coverage_id_vitesse_vent_'
+2026-02-28 13:51:14,071 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 13:52:45,856 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'coverage_id_vitesse_vent_'
+2026-02-28 13:52:45,857 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 13:52:59,267 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : 'NoneType' object has no attribute 'items'
+2026-02-28 13:52:59,268 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 13:53:08,544 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : 'NoneType' object has no attribute 'items'
+2026-02-28 13:59:15,569 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T13:59:15.569647 ---
+
+2026-02-28 13:59:15,705 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 13:59:15,707 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 13:59:15,707 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:04:13,501 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+1 : 'coverage_id_vitesse_vent_'
+2026-02-28 14:04:13,501 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 14:05:27,701 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'coverage_id_vitesse_vent_'
+2026-02-28 14:05:27,701 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 14:05:33,895 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : 'NoneType' object has no attribute 'items'
+2026-02-28 14:05:33,895 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 14:05:38,212 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : 'NoneType' object has no attribute 'items'
+2026-02-28 14:09:54,040 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:09:54.039976 ---
+
+2026-02-28 14:09:54,174 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:09:54,175 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:09:54,175 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:12:12,099 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+1 : 'coverage_id_vitesse_vent_'
+2026-02-28 14:12:12,099 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 14:12:19,438 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : 'coverage_id_vitesse_vent_'
+2026-02-28 14:12:19,438 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 14:12:23,037 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : 'NoneType' object has no attribute 'items'
+2026-02-28 14:12:23,037 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 14:12:25,770 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : 'NoneType' object has no attribute 'items'
+2026-02-28 14:21:30,815 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:21:30.815518 ---
+
+2026-02-28 14:21:30,948 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:21:30,949 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:21:30,949 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:23:48,768 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 14:23:57,535 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-02-28 14:24:02,213 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : 'NoneType' object has no attribute 'items'
+2026-02-28 14:24:02,213 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-02-28 14:24:05,100 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : 'NoneType' object has no attribute 'items'
+2026-02-28 14:28:39,958 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:28:39.958648 ---
+
+2026-02-28 14:28:40,089 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:28:40,090 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:28:40,090 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:30:57,068 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 14:32:11,915 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:32:11.915097 ---
+
+2026-02-28 14:32:12,049 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:32:12,051 [ERROR] services.get_forecast - Erreur lors de la suppression des prévisions du jour
+2026-02-28 14:32:12,051 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:33:46,196 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:33:46.196892 ---
+
+2026-02-28 14:33:46,327 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:33:46,330 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:33:46,330 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:36:03,279 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 14:46:05,622 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:46:05.622284 ---
+
+2026-02-28 14:46:05,754 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:46:05,755 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:46:05,755 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:48:25,157 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 14:52:11,776 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:52:11.776399 ---
+
+2026-02-28 14:52:11,908 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:52:11,910 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:52:11,910 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:54:29,935 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 14:57:49,062 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:57:49.062177 ---
+
+2026-02-28 14:57:49,193 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:57:49,195 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:57:49,195 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 14:59:51,788 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T14:59:51.788340 ---
+
+2026-02-28 14:59:51,923 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 14:59:51,925 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 14:59:51,925 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 15:02:18,624 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 15:06:04,007 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-02-28T15:06:04.007501 ---
+
+2026-02-28 15:06:04,138 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-02-28 15:06:04,139 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-02-28 15:06:04,140 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-02-28 21:46:02,660 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+1 : HTTPSConnectionPool(host='public-api.meteofrance.fr', port=443): Read timed out. (read timeout=None)
+2026-02-28 21:46:02,670 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-02-28 23:06:51,612 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+2 : ('Connection aborted.', ConnectionResetError(10054, 'Une connexion existante a dû être fermée par l’hôte distant', None, 10054, None))
+2026-03-01 09:01:38,545 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-03-01T09:01:38.545371 ---
+
+2026-03-01 09:01:38,678 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-03-01 09:01:38,680 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-03-01 09:01:38,680 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-03-01 09:02:00,465 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-03-01 09:02:49,596 [INFO] services.get_forecast - --- Mise à jour des prévisions météorologiques le 2026-03-01T09:02:49.596229 ---
+
+2026-03-01 09:02:49,725 [INFO] services.get_forecast - Suppression des prévisions du jour
+2026-03-01 09:02:49,727 [INFO] services.get_forecast - Prévisions du jour supprimées avec succès
+2026-03-01 09:02:49,727 [INFO] services.get_forecast - Rafraîchissement des prévisions J+1
+2026-03-01 09:03:07,853 [INFO] services.get_forecast - Rafraîchissement des prévisions J+2
+2026-03-01 09:03:12,460 [INFO] services.get_forecast - Rafraîchissement des prévisions J+3
+2026-03-01 09:03:16,355 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+3 : 'NoneType' object has no attribute 'items'
+2026-03-01 09:03:16,355 [INFO] services.get_forecast - Rafraîchissement des prévisions J+4
+2026-03-01 09:03:18,568 [ERROR] services.get_forecast - Erreur lors de la récupération des prévisions J+4 : 'NoneType' object has no attribute 'items'

@@ -1,3 +1,9 @@
+# Enregistrer en base de données les prévisions de vitesse de vent et d'ensoleillement à partir de la date du jour aux points correspondants à chaque station météo associée à une centrale.
+# 1. Récupérer avec API GetCapabilities le dernier coverageid disponible pour les paramètres WIND_SPEED__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND et DOWNWARD_SHORT_WAVE_RADIATION_FLUX__GROUND_OR_WATER_SURFACE
+# 2. Récupérer avec l'API DescribeCoverage la date de début et les pas de temps disponibles pour chaque paramètre
+# 3. Récupérer les lat et lon de chaque station météo associée à une centrale
+# 4. Récupérer avec l'API GetCoverage les prévisions de vitesse de vent et d'ensoleillement à partir de la date du jour aux points correspondants à chaque station météo associée à une centrale.
+
 from api.api_meteo import get_valid_token
 import requests
 from datetime import datetime, timedelta
@@ -190,3 +196,4 @@ def get_forecast_stations(coverage_ids,height):
     df_forecast = convert_to_df(forecast_vent, forecast_rayonnement)
     meteo = Meteo()
     meteo.save_forecast(df_forecast,db.conn)
+    

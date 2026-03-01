@@ -7,7 +7,10 @@ from services.combine_installations_stations import combine_installations_statio
 from services.maj_meteo import get_save_meteo_hier as maj_meteo_quotidien
 from services.maj_meteo import import_meteo_previous_month as maj_meteo_mois_precedent
 from services.maj_production import get_save_production as maj_production_mois_precedent
-from services.get_forecast import get_forecast_stations, get_coverage_ids
+from services.get_forecast_old import get_forecast_stations, get_coverage_ids
+
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=".env.local")
 
 import requests
 def get_forecast_package():
@@ -27,3 +30,4 @@ db = Database(
     password=os.getenv('DB_PASSWORD'),        
     port=os.getenv('DB_PORT')
 )
+db.create_forecast_table()

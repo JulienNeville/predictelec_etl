@@ -7,7 +7,9 @@ from services.combine_installations_stations import combine_installations_statio
 from services.maj_meteo import get_save_meteo_hier as maj_meteo_quotidien
 from services.maj_meteo import import_meteo_previous_month as maj_meteo_mois_precedent
 from services.maj_production import get_save_production as maj_production_mois_precedent
-from services.get_forecast import get_forecast_stations, get_coverage_ids
+from services.get_forecast_new import update_forecast_db
+from db.base import Database
+import os
 
 def main(action=None):
     print(f"Action donnée : {action}")
@@ -68,9 +70,7 @@ def main(action=None):
 
     elif action == "GET_FORECAST":
         print("Récupération des prévisions météorologiques...")
-        coverage_ids = get_coverage_ids()
-        print(coverage_ids)
-        get_forecast_stations(coverage_ids,height=10)
+        update_forecast_db()
 
 if __name__ == "__main__":
     #debug
@@ -78,7 +78,14 @@ if __name__ == "__main__":
     #main("MAJ_STRUCTURES")
     #main("MAJ_PROD")
     #main("MAJ_METEO")
-    #main("MAJ_METEO_PREC")
-    #main("GET_FORECAST")
-    #prod
-    main()
+    #main("MAJ_METEO_PREC") 
+    main("GET_FORECAST")
+
+# db = Database(
+#         host=os.getenv("DB_HOST"),
+#         dbname=os.getenv("DB_NAME"),
+#         user=os.getenv("DB_USER"),
+#         password=os.getenv("DB_PASSWORD"),
+#         port=os.getenv("DB_PORT"),
+#     )
+# db.create_forecast_table()
