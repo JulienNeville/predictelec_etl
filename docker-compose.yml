@@ -30,7 +30,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       MODE: ${MODE}
-      METEOFRANCE_BASIC_AUTH: ${METEOFRANCE_BASIC_AUTH}
+      METEOFRANCE_BASIC_AUTH_1: ${METEOFRANCE_BASIC_AUTH_1}
 volumes:
   postgres_data:
     external: true

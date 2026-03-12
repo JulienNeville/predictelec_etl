@@ -15,9 +15,9 @@ def get_valid_token():
     if _token_cache and time.time() < _token_cache["expires_at"]:
         return _token_cache["access_token"]
 
-    #print(os.getenv('METEOFRANCE_BASIC_AUTH')  )
+    #print(os.getenv('METEOFRANCE_BASIC_AUTH_1')  )
     headers = {
-        "Authorization": f"Basic {os.getenv('METEOFRANCE_BASIC_AUTH')}",
+        "Authorization": f"Basic {os.getenv('METEOFRANCE_BASIC_AUTH_1')}",
         "Content-Type": "application/x-www-form-urlencoded"
     }
 
@@ -48,9 +48,9 @@ def get_valid_token_debugwindows():
     if _token_cache and time.time() < _token_cache["expires_at"]:
         return _token_cache["access_token"]
 
-    basic_auth = os.getenv("METEOFRANCE_BASIC_AUTH")
+    basic_auth = os.getenv("METEOFRANCE_BASIC_AUTH_1")
     if not basic_auth:
-        raise ValueError("METEOFRANCE_BASIC_AUTH manquant")
+        raise ValueError("METEOFRANCE_BASIC_AUTH_1 manquant")
 
     cmd = [
         "curl.exe",

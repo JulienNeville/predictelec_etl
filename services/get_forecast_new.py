@@ -30,7 +30,6 @@ def meteo_header():
     Récupère un token d'authentification valide pour l'API Météo France et retourne les headers à utiliser pour les requêtes.
     '''
     TOKEN = get_valid_token()
-    # TOKEN = os.getenv("TOKEN_METEO_FRANCE")
     if not TOKEN:
         raise ValueError("Pas de TOKEN METEO_FRANCE valide généré.")
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
@@ -49,25 +48,26 @@ def merge_dfs(forecast_vent, forecast_rayonnement):
                 "rayonnement_solaire": None,
             })
 
-    for id_station, times in forecast_rayonnement.items():
-        for forecast_time, vals in times.items():
-            match = next(
-                (r for r in rows
-                if r["id_station"] == id_station and r["forecast_time"] == forecast_time),
-                None,
-            )
-            if match is not None:
-                match["coverage_id_rayonnement_solaire"] = vals.get("coverage_id_rayonnement_solaire")
-                match["rayonnement_solaire"] = vals.get("rayonnement_solaire")
-            else:
-                rows.append({
-                    "id_station": id_station,
-                    "forecast_time": forecast_time,
-                    "coverage_id_vitesse_vent": vals.get("coverage_id_vitesse_vent"),
-                    "vitesse_vent": vals.get("vitesse_vent"),
-                    "coverage_id_rayonnement_solaire": vals.get("coverage_id_rayonnement_solaire"),
-                    "rayonnement_solaire": vals.get("rayonnement_solaire"),
-                })
+    if forecast_rayonnement is not None:
+        for id_station, times in forecast_rayonnement.items():
+            for forecast_time, vals in times.items():
+                match = next(
+                    (r for r in rows
+                    if r["id_station"] == id_station and r["forecast_time"] == forecast_time),
+                    None,
+                )
+                if match is not None:
+                    match["coverage_id_rayonnement_solaire"] = vals.get("coverage_id_rayonnement_solaire")
+                    match["rayonnement_solaire"] = vals.get("rayonnement_solaire")
+                else:
+                    rows.append({
+                        "id_station": id_station,
+                        "forecast_time": forecast_time,
+                        "coverage_id_vitesse_vent": vals.get("coverage_id_vitesse_vent"),
+                        "vitesse_vent": vals.get("vitesse_vent"),
+                        "coverage_id_rayonnement_solaire": vals.get("coverage_id_rayonnement_solaire"),
+                        "rayonnement_solaire": vals.get("rayonnement_solaire"),
+                    })
     df = pd.DataFrame(rows)
     return df
 
@@ -77,8 +77,6 @@ def get_coverage_ids(weather_parameters):
     '''
     capabilities_url = "https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCapabilities?service=WCS&version=2.0.1&language=fre"
     response = requests.get(capabilities_url,headers=meteo_header())
-    # with open("capabilities.xml", "w", encoding="utf-8") as f:
-    #     f.write(response.text)
     if response.status_code == 200:
         root = ET.fromstring(response.text)
         ns = {
@@ -158,47 +156,47 @@ def get_forecast_parameter(coverage_ids,parameter,df,J_plus_i):
     '''
     time_steps = get_time_steps(coverage_ids[parameter],J_plus_i)
     if time_steps:
-        j=0
+        # j=0
         i = 0
         stations_dict = {}
         for index, row in df.iterrows():
-            if j < 1:
-                date_dict = {}
-                for date in time_steps:
-                    parameter_dict = {}
-                    i+=1
-                    if i >=98:
-                        time.sleep(60) #attente pour ne pas sursolliciter le serveur : limite de 100 requêtes par minute
-                        i=0
-                    latitude = row["station_latitude"]
-                    longitude = row["station_longitude"]
-                    if parameter == "vent":
-                        height = "10"
-                        forecast_url = f"https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCoverage?service=WCS&version=2.0.1&coverageid={coverage_ids['vent']}&subset=time%28{date}%29%26subset%3Dheight%28{height}%29%26subset%3Dlat%28{latitude}%29%26subset%3Dlong%28{longitude}%29&format=application%2Fwmo-grib"
-                    elif parameter == "rayonnement":
-                        forecast_url = f"https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCoverage?service=WCS&version=2.0.1&coverageid={coverage_ids['rayonnement']}&subset=time%28{date}%29%26subset%3Dlat%28{latitude}%29%26subset%3Dlong%28{longitude}%29&format=application%2Fwmo-grib"
+            # if j < 1:
+            date_dict = {}
+            for date in time_steps:
+                parameter_dict = {}
+                i+=1
+                if i >=98:
+                    time.sleep(60) #attente pour ne pas sursolliciter le serveur : limite de 100 requêtes par minute
+                    i=0
+                latitude = row["station_latitude"]
+                longitude = row["station_longitude"]
+                if parameter == "vent":
+                    height = "10"
+                    forecast_url = f"https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCoverage?service=WCS&version=2.0.1&coverageid={coverage_ids['vent']}&subset=time%28{date}%29%26subset%3Dheight%28{height}%29%26subset%3Dlat%28{latitude}%29%26subset%3Dlong%28{longitude}%29&format=application%2Fwmo-grib"
+                elif parameter == "rayonnement":
+                    forecast_url = f"https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCoverage?service=WCS&version=2.0.1&coverageid={coverage_ids['rayonnement']}&subset=time%28{date}%29%26subset%3Dlat%28{latitude}%29%26subset%3Dlong%28{longitude}%29&format=application%2Fwmo-grib"
 
-                    response = requests.get(forecast_url, headers=meteo_header())
-                    if response.status_code == 200:
-                        root = ET.fromstring(response.text)
-                        ns = {
-                            "gml": "http://www.opengis.net/gml/3.2",
-                        }
-                        tuple_list = root.find(".//gml:tupleList", ns)
-                        raw = tuple_list.text.strip()
-                        value = float(raw)
-                        if parameter == "vent":
-                            parameter_dict["coverage_id_vitesse_vent"] = coverage_ids['vent']
-                            parameter_dict["vitesse_vent"] = value
-                        elif parameter == "rayonnement":
-                            parameter_dict["coverage_id_rayonnement_solaire"] = coverage_ids['rayonnement']
-                            parameter_dict["rayonnement_solaire"] = value
-                        print(f"Successfully retrieved forecast for station {row['id_station']} at {date}")
-                    else:
-                        print(f"Failed to retrieve forecast for station {row['id_station']} at {date}")
-                    date_dict[date] = parameter_dict
-                stations_dict[row["id_station"]] = date_dict
-            j+=1
+                response = requests.get(forecast_url, headers=meteo_header())
+                if response.status_code == 200:
+                    root = ET.fromstring(response.text)
+                    ns = {
+                        "gml": "http://www.opengis.net/gml/3.2",
+                    }
+                    tuple_list = root.find(".//gml:tupleList", ns)
+                    raw = tuple_list.text.strip()
+                    value = float(raw)
+                    if parameter == "vent":
+                        parameter_dict["coverage_id_vitesse_vent"] = coverage_ids['vent']
+                        parameter_dict["vitesse_vent"] = value
+                    elif parameter == "rayonnement":
+                        parameter_dict["coverage_id_rayonnement_solaire"] = coverage_ids['rayonnement']
+                        parameter_dict["rayonnement_solaire"] = value
+                    print(f"Successfully retrieved {parameter} forecast for station {row['id_station']} at {date}")
+                else:
+                    print(f"Failed to retrieve {parameter} forecast for station {row['id_station']} at {date}")
+                date_dict[date] = parameter_dict
+            stations_dict[row["id_station"]] = date_dict
+            # j+=1
         return stations_dict
     else:
         print(f"Time steps for {parameter} is empty.")
@@ -206,7 +204,6 @@ def get_forecast_parameter(coverage_ids,parameter,df,J_plus_i):
 
 def update_forecast_days(conn, weather_parameters, J_plus_i):
     station = Station()
-    # query = "select sc.id_station, s.station_latitude, s.station_longitude, s.mesure_vent, s.mesure_rayonnement from stations_centrales AS sc JOIN stations AS s ON sc.id_station = s.id_station"
     df_stations = station.getlistStationUtile(conn)
     df_vent = df_stations[df_stations["mesure_vent"] == True].copy()
     df_rayonnement = df_stations[df_stations["mesure_rayonnement"] == True].copy()
