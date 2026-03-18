@@ -5,59 +5,104 @@ import subprocess
 import json
 
 TOKEN_URL = "https://portail-api.meteofrance.fr/token"
-_token_cache = None
+_token_cache = {}
+
+def get_users():
+    users = []
+    i = 1
+    while True:
+        token = os.getenv(f"METEOFRANCE_BASIC_AUTH_{i}")
+        if not token:
+            break
+        users.append({"name": f"user_{i}", "token": token})
+        i += 1
+
+    if not users:
+        raise ValueError("Pas de tokens")
+
+    return users
 
 
-def get_valid_token():
+# Récupère un token valide, en utilisant le cache si possible
+def get_valid_token(token_user=None):
     global _token_cache
 
-    # Token encore valide ?
-    if _token_cache and time.time() < _token_cache["expires_at"]:
-        return _token_cache["access_token"]
+    # récupère les tokens disponibles dans les variables d'environnement
+    users = get_users()
 
-    print(os.getenv('METEOFRANCE_BASIC_AUTH_1')  )
+    if not users:
+        raise ValueError("Aucun utilisateur/token disponible.")
+
+    if token_user is None:
+        # Par défaut, on prend le premier user disponible        
+        token_user = users[0]["name"]
+
+    # Recherche du token en cache pour ce user
+    token_data = _token_cache.get(token_user)
+
+    # Token encore valide ?
+    if token_data and time.time() < token_data["expires_at"]:
+        return token_data["access_token"]
+
+    # Sinon on demande un nouveau token
+    user_secret = os.getenv(token_user)
+    if not user_secret:
+        raise ValueError(f"Aucune variable d'environnement trouvée pour {token_user}")
+
     headers = {
-        "Authorization": f"Basic {os.getenv('METEOFRANCE_BASIC_AUTH_1')}",
+        "Authorization": f"Basic {user_secret}",
         "Content-Type": "application/x-www-form-urlencoded"
     }
-
-    body = "grant_type=client_credentials"
 
     r = requests.post(
         TOKEN_URL,
         headers=headers,
-        data=body,
+        data="grant_type=client_credentials",
         timeout=10
     )
     r.raise_for_status()
 
     data = r.json()
 
-    _token_cache = {
+    # Mise à jour ou ajout dans le cache
+    _token_cache[token_user] = {
         "access_token": data["access_token"],
         "expires_at": time.time() + data["expires_in"] - 60
     }
 
-    return _token_cache["access_token"]
+    return _token_cache[token_user]["access_token"]
 
-
-def get_valid_token_debugwindows():
+def get_valid_token_debugwindows(token_user=None):
     global _token_cache
 
-    # Cache 1h
-    if _token_cache and time.time() < _token_cache["expires_at"]:
-        return _token_cache["access_token"]
+    # Recherche du token en cache pour ce user
+    users = get_users()
 
-    basic_auth = os.getenv("METEOFRANCE_BASIC_AUTH_1")
-    if not basic_auth:
-        raise ValueError("METEOFRANCE_BASIC_AUTH_1 manquant")
+    if not users:
+        raise ValueError("Aucun utilisateur/token disponible.")
+
+    if token_user is None:
+        # Par défaut, on prend le premier user disponible
+        token_user = users[0]["name"]
+
+    # Recherche du token en cache pour ce user
+    token_data = _token_cache.get(token_user)
+
+    # Token encore valide ?
+    if token_data and time.time() < token_data["expires_at"]:
+        return token_data["access_token"]
+
+    # Sinon on demande un nouveau token
+    user_secret = os.getenv(token_user)
+    if not user_secret:
+        raise ValueError(f"Aucune variable d'environnement trouvée pour {token_user}")
 
     cmd = [
         "curl.exe",
         "-s",
         "-X", "POST",
         TOKEN_URL,
-        "-H", f"Authorization: Basic {basic_auth}",
+        "-H", f"Authorization: Basic {user_secret}",
         "-H", "Content-Type: application/x-www-form-urlencoded",
         "-d", "grant_type=client_credentials"
     ]
@@ -73,9 +118,10 @@ def get_valid_token_debugwindows():
 
     data = json.loads(result.stdout)
 
-    _token_cache = {
+    # Mise à jour ou ajout dans le cache
+    _token_cache[token_user] = {
         "access_token": data["access_token"],
         "expires_at": time.time() + data["expires_in"] - 60
     }
 
-    return _token_cache["access_token"]
+    return _token_cache[token_user]["access_token"]
