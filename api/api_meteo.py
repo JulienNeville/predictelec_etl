@@ -14,7 +14,7 @@ def get_users():
         token = os.getenv(f"METEOFRANCE_BASIC_AUTH_{i}")
         if not token:
             break
-        users.append({"name": f"user_{i}", "token": token})
+        users.append({"name": f"user_{i}", "token_user":f"METEOFRANCE_BASIC_AUTH_{i}", "token": token})
         i += 1
 
     if not users:
@@ -35,7 +35,7 @@ def get_valid_token(token_user=None):
 
     if token_user is None:
         # Par défaut, on prend le premier user disponible        
-        token_user = users[0]["name"]
+        token_user = users[0]["token_user"]
 
     # Recherche du token en cache pour ce user
     token_data = _token_cache.get(token_user)
@@ -83,7 +83,7 @@ def get_valid_token_debugwindows(token_user=None):
 
     if token_user is None:
         # Par défaut, on prend le premier user disponible
-        token_user = users[0]["name"]
+        token_user = users[0]["token_user"]
 
     # Recherche du token en cache pour ce user
     token_data = _token_cache.get(token_user)

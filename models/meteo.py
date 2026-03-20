@@ -55,6 +55,28 @@ class Meteo:
 
         return isuccess
     
+    def archive_forecast_partiels(self, df, conn):
+        try:
+            cur = conn.cursor()
+            for index, row in df.iterrows():
+                forecast_time = row['forecast_time']
+                id_station = row['id_station']
+                cur.execute("""
+                    INSERT INTO forecast_archive(id_forecast, id_station, forecast_time, vitesse_vent, rayonnement_solaire, date_archivage)
+                    SELECT id_forecast, id_station, forecast_time, vitesse_vent, rayonnement_solaire, CURRENT_TIMESTAMP 
+                    FROM forecast
+                    WHERE forecast_time = %s AND id_station = %s;
+                """, (forecast_time, id_station))
+                cur.execute("""
+                    DELETE FROM forecast
+                    WHERE forecast_time = %s AND id_station = %s;
+                """, (forecast_time, id_station  ))  
+            conn.commit()
+            print("Prévisions météo archivées avec succès.")
+        except Exception as e:
+            conn.rollback()
+            print(f"Erreur lors de l'archivage des prévisions météo : {e}")
+    
     def archive_forecast(self,conn):
         try:
             cur = conn.cursor()
@@ -68,6 +90,23 @@ class Meteo:
         except Exception as e:
             conn.rollback()
             print(f"Erreur lors de l'archivage des prévisions météo : {e}")
+
+    """ Archive les prévisions météo historiques dont la date de validité est antérieure à la date du jour avant de les supprimer de la table forecast.
+    """
+    def archive_forecast_historique(self,conn):
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO forecast_archive(id_forecast, id_station, forecast_time, vitesse_vent, rayonnement_solaire, date_archivage)
+                SELECT id_forecast, id_station, forecast_time, vitesse_vent, rayonnement_solaire, CURRENT_TIMESTAMP FROM forecast
+                WHERE forecast_time < date(CURRENT_DATE);
+            """)
+            cur.execute("DELETE FROM forecast where forecast_time < date(CURRENT_DATE);")
+            conn.commit()
+            print("Prévisions météo historiques archivées avec succès.")
+        except Exception as e:
+            conn.rollback()
+            print(f"Erreur lors de l'archivage des prévisions météo historiques : {e}")            
 
     def save_forecast(self, df, conn):
         print("sauvegarde des prévisions météo...")
@@ -115,6 +154,48 @@ class Meteo:
 
             conn.commit()
             print(f"{len(records)} lignes de prévisions meteo sauvegardées/ajustées en base")
+        except Exception as e:
+            conn.rollback()
+            print(f"Erreur lors de la sauvegarde des prévisions météo : {e}")
+            isuccess = False
+
+        return isuccess
+    
+    def save_forecast_partiels(self, data, conn):
+        print("sauvegarde des prévisions météo...")
+        isuccess = True
+
+        sql = """
+            INSERT INTO forecast (
+                id_station,
+                forecast_time,
+                vitesse_vent,
+                rayonnement_solaire
+            )
+            VALUES (%s, %s, %s, %s) 
+        """
+
+        try:
+            df=pd.DataFrame(data)
+
+            with conn.cursor() as cur:
+                #archiver les prévisions existantes avant de les écraser
+                self.archive_forecast_partiels(df,conn)
+
+                records = [
+                    (
+                        row.id_station,
+                        row.forecast_time,
+                        row.vitesse_vent,
+                        row.rayonnement_solaire,
+                    )
+                    for row in df.itertuples(index=False)
+                ]
+
+                execute_batch(cur, sql, records, page_size=1000)
+
+            conn.commit()
+            print(f"{len(records)} lignes de prévisions meteo sauvegardées/ajoutées en base")
         except Exception as e:
             conn.rollback()
             print(f"Erreur lors de la sauvegarde des prévisions météo : {e}")
