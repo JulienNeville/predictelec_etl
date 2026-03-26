@@ -5,30 +5,42 @@ from datetime import timedelta
 import os
 import time
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import xml.etree.ElementTree as ET
 from datetime import datetime
 import pandas as pd
+import logging
 
-#  IMPORT code
-from DST_PREDICTELEC.api.api_meteo import get_valid_token
-from DST_PREDICTELEC.db.base import Database
-from DST_PREDICTELEC.models.station import Station
-from DST_PREDICTELEC.models.meteo import Meteo
+log = logging.getLogger(__name__)
 
-# utilisation .env projet : recherche du chemin relatif du fichier
-from dotenv import load_dotenv
-base_dir = os.path.dirname(__file__)
-dotenv_path = os.path.abspath(
-        os.path.join(base_dir, "..", "plugins", "DST_PREDICTELEC", ".env")
-)
-print("chargement .env depuis:",dotenv_path)
-load_dotenv(dotenv_path)
+#  IMPORT code depuis un namespace (obligatoire) : predictelec -> /opt/predictelec/current/predictelec
+from api.api_meteo import get_valid_token
+from db.base import Database
+from models.station import Station
+from models.meteo import Meteo
+
+
 #afficher les variables disponibles
-print(os.environ)
+#print(os.environ)
+print(f"host:{os.getenv('DB_NAME')}")
 
 # -------------------------
 # Fonctions utilitaires
 # -------------------------
+def create_session():
+    session = requests.Session()
+
+    retry = Retry(
+        total=3,
+        backoff_factor=1,  # 1s, 2s, 4s
+        status_forcelist=[429, 500, 502, 503, 504],
+    )
+
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+
+    return session
 
 def save_unitaire(results):
     db = Database(
@@ -181,7 +193,7 @@ with DAG(
     def generate_requests(stations, cov_ids, users):
         # récupérer time_steps UNE fois
         token_user=users[0]["token_user"]
-        print("token_user =",token_user)
+        #print("token_user =",token_user)
         
         time_steps = get_time_steps(cov_ids["vent"], token_user)
 
@@ -217,7 +229,10 @@ with DAG(
     # 6. Worker API
     # -------------------------
 
-    @task(retries=2, retry_delay=timedelta(minutes=2))
+    @task(
+            retries=3, 
+            retry_delay=timedelta(minutes=2),
+            execution_timeout=timedelta(hours=2))
     def process_batch(data, cov_ids):
         #print("type(data) =", type(data))
         #print("data =", data)
@@ -226,15 +241,22 @@ with DAG(
         
         user = data["user"]
         batch = data["batch"]
+        
         token_user=user["token_user"]
         print("token_user =",token_user)
+        print(f"nb de batch à traiter:{len(batch)}")
+        log.info(f"token_user:{token_user}-Nb de batch à traiter:{len(batch)}")
 
         headers = meteo_header(token_user)
 
         results = []
+        i=0
+
+        session = create_session()
 
         for req in batch:
             result_partiel=[]
+            i+=1
 
             station = req["station"]
             date = req["date"]
@@ -256,45 +278,60 @@ with DAG(
                 height=10
                 forecast_url = f"https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCoverage?service=WCS&version=2.0.1&coverageid={cov_ids['vent']}&subset=time%28{date}%29%26subset%3Dheight%28{height}%29%26subset%3Dlat%28{latitude}%29%26subset%3Dlong%28{longitude}%29&format=application%2Fwmo-grib"
 
-                r = requests.get(forecast_url, headers=headers)
+                #r = requests.get(forecast_url, headers=headers, timeout=10)
+                try:
 
-                if r.status_code == 200:
-                    root = ET.fromstring(r.text)
-                    ns = {
-                        "gml": "http://www.opengis.net/gml/3.2",
-                    }
-                    tuple_list = root.find(".//gml:tupleList", ns)
-                    raw = tuple_list.text.strip()
-                    value = float(raw)               
-                    #résultat pour le vent
-                    vitesse_vent = value
-                    
-                    print(f"Succès de récupération prévision du vent pour la station {station['id_station']} à la date {date}")
-                else:
-                    print(f"Echec lors de la récupération prévision du vent pour la station {station['id_station']} à la date {date}")
-                    
+                    r = session.get(forecast_url, headers=headers, timeout=30)
+                    r.raise_for_status()
+                    if r.status_code == 200:
+                        root = ET.fromstring(r.text)
+                        ns = {
+                            "gml": "http://www.opengis.net/gml/3.2",
+                        }
+                        tuple_list = root.find(".//gml:tupleList", ns)
+                        raw = tuple_list.text.strip()
+                        value = float(raw)               
+                        #résultat pour le vent
+                        vitesse_vent = value
+                        
+                        log.info(f"Succès de récupération prévision du vent pour la station {station['id_station']} à la date {date}")
+                    else:
+                        log.info(f"Echec lors de la récupération prévision du vent pour la station {station['id_station']} à la date {date}")
+                except requests.exceptions.RequestException as e:
+                    log.error(f"Echec lors de la récupération prévision du vent pour la station {station['id_station']} à la date {date}")
+                    log.error(f"Erreur API : {e}")
+                    continue                
+                
                 # 60s / 100 requêtes soit 0.6 s par requête
                 time.sleep(0.6)
 
             if avec_rayonnement == True:
                 forecast_url = f"https://public-api.meteofrance.fr/public/arpege/1.0/wcs/MF-NWP-GLOBAL-ARPEGE-025-GLOBE-WCS/GetCoverage?service=WCS&version=2.0.1&coverageid={cov_ids['rayonnement']}&subset=time%28{date}%29%26subset%3Dlat%28{latitude}%29%26subset%3Dlong%28{longitude}%29&format=application%2Fwmo-grib"
 
-                r = requests.get(forecast_url, headers=headers)
+                #r = requests.get(forecast_url, headers=headers)
 
-                if r.status_code == 200:
-                    root = ET.fromstring(r.text)
-                    ns = {
-                        "gml": "http://www.opengis.net/gml/3.2",
-                    }
-                    tuple_list = root.find(".//gml:tupleList", ns)
-                    raw = tuple_list.text.strip()
-                    value = float(raw)
-                    #résultat pour le rayonnement
-                    rayonnement_solaire = value
-                    
-                    print(f"Succès récupération prévision du rayonnement pour la station {station['id_station']} à la date {date}")
-                else:
-                    print(f"Echec lors de la récupération prévision du rayonnement pour la station {station['id_station']} à la date {date}")     
+                
+                try:
+                    r = session.get(forecast_url, headers=headers, timeout=30)
+                    r.raise_for_status()
+                    if r.status_code == 200:
+                        root = ET.fromstring(r.text)
+                        ns = {
+                            "gml": "http://www.opengis.net/gml/3.2",
+                        }
+                        tuple_list = root.find(".//gml:tupleList", ns)
+                        raw = tuple_list.text.strip()
+                        value = float(raw)
+                        #résultat pour le rayonnement
+                        rayonnement_solaire = value
+                        
+                        log.info(f"Succès récupération prévision du rayonnement pour la station {station['id_station']} à la date {date}")
+                    else:
+                        log.info(f"Echec lors de la récupération prévision du rayonnement pour la station {station['id_station']} à la date {date}")  
+                except requests.exceptions.RequestException as e:
+                    log.error(f"Echec lors de la récupération prévision du rayonnement pour la station {station['id_station']} à la date {date}")     
+                    log.error(f"Erreur API : {e}")
+                    continue 
                 
                 # 60s / 100 requêtes soit 0.6 s par requête
                 time.sleep(0.6)                    
@@ -310,8 +347,13 @@ with DAG(
             #sauvegarde unitaire dans la DB pour éviter de tout perdre en cas d'erreur
             save_unitaire(result_partiel)
             results.extend(result_partiel) 
+            
+            print(f"Nombre de batch traitées : {i}/{len(batch)}: nb prévisions : {len(results)}")
+            log.info(f"Nombre de batch traitées : {i}/{len(batch)}: nb prévisions : {len(results)}")
+            
 
         return f"Nombres de prévisions récupérées et sauvegardées : {len(results)}"
+        
 
 
     # ---------------------------------------------------------

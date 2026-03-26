@@ -8,7 +8,7 @@ from services.combine_installations_stations import combine_installations_statio
 from services.maj_meteo import get_save_meteo_hier as maj_meteo_quotidien
 from services.maj_meteo import import_meteo_previous_month as maj_meteo_mois
 from services.maj_production import get_save_production as maj_production_mois_precedent
-from services.get_forecast_new import update_forecast_db
+#from services.get_forecast_new import update_forecast_db
 from services.get_forecast_old import maj_prevision
 import os
 import dotenv
@@ -21,7 +21,7 @@ def main(action=None, parametres=None):
     if action is None:
         parser = argparse.ArgumentParser(description="Gestion des opérations Predictelec")
         parser.add_argument("action", choices=["INIT", "INIT_VIEWS", "REFRESH_VIEWS", "MAJ_STRUCTURES", "MAJ_STATIONS","COMBINE_STRUCTURES", "MAJ_PROD", "MAJ_METEO","MAJ_METEO_PREC","MAJ_METEO_PREC_MOIS", "MAJ_PREVISION"])
-        parser.add_argument("parametres", nargs="?", help="Paramètres supplémentaires pour certaines actions (optionnel)")
+        parser.add_argument("parametres", nargs="*", help="Paramètres supplémentaires pour certaines actions (optionnel)")
         
         args = parser.parse_args()
         action=args.action
