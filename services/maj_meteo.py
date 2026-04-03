@@ -264,11 +264,7 @@ def import_meteo_previous_month(date_ref=None):
 def get_save_meteo_hier():
 
     """
-    Récupère toutes les données meteo entre deux dates en paginant par blocs de 100.
-    - debut_date et fin_date au format 'YYYY-MM-DD'
-    - region (optionnel) : ex 'Auvergne-Rhône-Alpes'
-    
-    Retourne une liste de dicts (enregistrements).
+    Récupère les données meteo de toutes les stations éligibles sur les x derniers jours et les sauvegarde dans la base de données
     """
     df_stations_data = pd.DataFrame()
     df_stations_data_select = pd.DataFrame()
@@ -318,8 +314,7 @@ def get_save_meteo_hier():
                 station_str = str(station)
                 if len(station_str)<8:
                     station_str = station_str.zfill(8)
-                #BASE_URL = f"https://public-api.meteofrance.fr/public/DPPaquetObs/v1/paquet/infrahoraire-6m?id_station={station_str}&format=json"
-                BASE_URL = f"https://public-api.meteofrance.fr/public/DPPaquetObs/v1/paquet/infrahoraire-6m?date=2024-05-06T18:00:00Z&id_station={station_str}&format=json"
+                BASE_URL = f"https://public-api.meteofrance.fr/public/DPPaquetObs/v1/paquet/infrahoraire-6m?id_station={station_str}&format=json"
                 response = requests.get(BASE_URL, headers=HEADERS)
                 response.raise_for_status()
                 data = response.json()
