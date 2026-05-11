@@ -153,6 +153,92 @@ class Database:
             """)
 
             self.cursor.execute("""
+                /*Création de la table méteo ramené à la région par tranche de 15 minutes
+                    pour correspondre aux données de production*/
+                DROP MATERIALIZED VIEW IF EXISTS mv_meteo_region_15min_2 CASCADE;
+                CREATE MATERIALIZED VIEW mv_meteo_region_15min_2 AS
+                WITH station_region AS (
+                    SELECT DISTINCT
+                        sc.id_station,
+                        d.num_region
+                    FROM stations_centrales sc
+                    JOIN centrales c ON sc.id_centrale = c.id_centrale
+                    JOIN departements d ON c.num_dep = d.num_dep
+                    WHERE c.codetechnologie IN ('TERRE', 'PHOTV')
+                    AND (
+                            (c.codetechnologie = 'TERRE' AND sc.ordre = 1)
+                            OR (c.codetechnologie = 'PHOTV')
+                        )
+                ),
+                meteo_15 AS (
+                    SELECT
+                        id_station,
+                        date_trunc('hour', validity_time)
+                        + floor(extract(minute FROM validity_time) / 15) * interval '15 minutes'
+                        AS validity_time_interval_15,
+                        vitesse_vent,
+                        rayonnement_solaire
+                    FROM meteo
+                )
+                SELECT
+                    sr.num_region,
+                    m15.validity_time_interval_15		AS date_heure,
+                    ROUND(AVG(m15.vitesse_vent), 2)        AS moyenne_vitesse_vent,
+                    ROUND(AVG(m15.rayonnement_solaire), 2) AS moyenne_rayonnement_solaire
+                FROM meteo_15 m15
+                JOIN station_region sr
+                ON m15.id_station = sr.id_station
+                GROUP BY
+                    sr.num_region,
+                    m15.validity_time_interval_15
+                ORDER BY
+                    sr.num_region,
+                    m15.validity_time_interval_15;
+            """)
+
+            self.cursor.execute("""
+                /*Création de la table forecast ramené à la région par tranche de 15 minutes
+                    pour correspondre aux données de production*/
+                DROP MATERIALIZED VIEW IF EXISTS mv_forecast_region_15min_2 CASCADE;
+                CREATE MATERIALIZED VIEW mv_forecast_region_15min_2 AS
+                WITH station_region AS (
+                    SELECT DISTINCT
+                        sc.id_station,
+                        d.num_region
+                    FROM stations_centrales sc
+                    JOIN centrales c ON sc.id_centrale = c.id_centrale
+                    JOIN departements d ON c.num_dep = d.num_dep
+                    WHERE c.codetechnologie IN ('TERRE', 'PHOTV')
+                    AND (
+                            (c.codetechnologie = 'TERRE' AND sc.ordre = 1)
+                            OR (c.codetechnologie = 'PHOTV')
+                        )
+                ),
+                meteo_15 AS (
+                    SELECT
+                        id_station,
+                        forecast_time  AS validity_time_interval_15,
+                        vitesse_vent,
+                        rayonnement_solaire
+                    FROM forecast
+                )
+                SELECT
+                    sr.num_region,
+                    m15.validity_time_interval_15		AS timestamp,
+                    ROUND(AVG(m15.vitesse_vent), 2)        AS moyenne_vitesse_vent,
+                    ROUND(AVG(m15.rayonnement_solaire), 2) AS moyenne_rayonnement_solaire
+                FROM meteo_15 m15
+                JOIN station_region sr
+                ON m15.id_station = sr.id_station
+                GROUP BY
+                    sr.num_region,
+                    m15.validity_time_interval_15
+                ORDER BY
+                    sr.num_region,
+                    m15.validity_time_interval_15;
+            """)
+
+            self.cursor.execute("""
                 /*table pour entrainer le modèle ML concernant l'éolien*/
                 CREATE OR REPLACE VIEW prod_eolien_meteo AS
                 SELECT
@@ -170,6 +256,37 @@ class Database:
             """)
 
             self.cursor.execute("""
+                /*table pour entrainer le modèle ML concernant l'éolien*/
+                CREATE OR REPLACE VIEW prod_eolien_meteo_2 AS
+                SELECT
+                    p.num_region as code_region_insee,
+                    r.region_name as region,
+                    p.date_heure as timestamp,
+                    m.moyenne_vitesse_vent as vitesse_vent_15min,
+                    p.prod_eolien as eol_mwh_15min
+                FROM production p
+                INNER JOIN mv_meteo_region_15min_2 m
+                ON m.num_region = p.num_region
+                AND m.date_heure = p.date_heure
+                INNER JOIN regions r
+                ON r.num_region = p.num_region;
+            """)
+
+            self.cursor.execute("""
+                /*table pour entrainer le modèle ML concernant l'éolien*/
+                CREATE OR REPLACE VIEW pred_eolien_forecast_2 AS
+                SELECT
+                    m.num_region as code_region_insee,
+                    r.region_name as region,
+                    m.timestamp as timestamp,
+                    GREATEST(m.moyenne_vitesse_vent, 0)::numeric(10,2) as vitesse_vent_15min
+                FROM mv_forecast_region_15min_2 m
+                INNER JOIN regions r
+                ON r.num_region = m.num_region
+                WHERE m.moyenne_vitesse_vent IS NOT NULL;
+            """)            
+
+            self.cursor.execute("""
                 /*table pour entrainer le modèle ML concernant le solaire*/
                 CREATE OR REPLACE VIEW prod_solaire_meteo AS
                 SELECT
@@ -185,6 +302,37 @@ class Database:
                 AND m.date_heure = p.date_heure
                 WHERE m.moyenne_rayonnement_solaire IS NOT NULL;
                                 """)
+            
+            self.cursor.execute("""
+                /*table pour entrainer le modèle ML concernant le solaire*/
+                CREATE OR REPLACE VIEW prod_solaire_meteo_2 AS
+                SELECT
+                    p.num_region as code_region_insee,
+                    r.region_name as region,
+                    p.date_heure as timestamp,
+                    m.moyenne_rayonnement_solaire as ghi_wh_m2_15min,
+                    p.prod_solaire as pv_mwh_15min
+                FROM production p
+                INNER JOIN mv_meteo_region_15min_2 m
+                ON m.num_region = p.num_region
+                AND m.date_heure = p.date_heure
+                INNER JOIN regions r
+                ON r.num_region = p.num_region;
+                                """)  
+
+            self.cursor.execute("""
+                /*table pour entrainer le modèle ML concernant le solaire*/
+                CREATE OR REPLACE VIEW pred_solaire_forecast_2 AS
+                SELECT
+                    m.num_region as code_region_insee,
+                    r.region_name as region,
+                    m.timestamp as timestamp,
+                    GREATEST(m.moyenne_rayonnement_solaire, 0)::numeric(10,2) as ghi_wh_m2_15min
+                FROM mv_forecast_region_15min_2 m
+                INNER JOIN regions r
+                ON r.num_region = m.num_region
+                WHERE m.moyenne_rayonnement_solaire IS NOT NULL;
+                                """)                       
 
             self.conn.commit()
             print("Vues créées ou remplacées avec succès.")
@@ -200,7 +348,9 @@ class Database:
             # attention : l'ordre est important 
             self.cursor.execute("""
                 /*Commande pour mettre à jour la vue*/
-                REFRESH MATERIALIZED VIEW mv_meteo_region_15min;
+                --REFRESH MATERIALIZED VIEW mv_meteo_region_15min;
+                REFRESH MATERIALIZED VIEW mv_meteo_region_15min_2;
+                REFRESH MATERIALIZED VIEW mv_forecast_region_15min_2;
             """)
             self.conn.commit()
             print("Vue mv_meteo_region_15min actualisée avec succès.")
