@@ -52,14 +52,17 @@ def main(action=None, parametres=None):
         maj_geoloc()
         maj_stations()
         combine()
+        refresh_views()
 
     elif action == "COMBINE_STRUCTURES":
         print("Mise à jour uniquement des combinaisons installations/stations...")
         combine()
+        refresh_views()
 
     elif action == "MAJ_STATIONS":
         print("Mise à jour uniquement des stations météo...")
         maj_stations()
+        refresh_views()
 
     elif action == "MAJ_PROD":
         print("Mise à jour mois précédent des données de production...")
@@ -90,6 +93,7 @@ def main(action=None, parametres=None):
         print("Récupération des prévisions météorologiques...")
         #update_forecast_db()
         maj_prevision()
+        refresh_views()
 
 if __name__ == "__main__":
     if os.getenv('MODE') == "DEV":
